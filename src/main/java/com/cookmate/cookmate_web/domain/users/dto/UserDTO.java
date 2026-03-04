@@ -1,27 +1,26 @@
 package com.cookmate.cookmate_web.domain.users.dto;
 
-import com.cookmate.cookmate_web.domain.users.entity.User;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.*;
 
-import java.time.LocalDateTime;
-
 /**
  * @file        UserDTO.java
- * @description 사용자 정보 DTO
+ * @description 사용자 정보 DTO 정의
  * @author      강보람
  * @since       2026-01-17
  * @version     1.0
  *
  * <pre>
- * 수정일          수정자          수정내용
- * ----------    ----------    ---------------------------
- * 2026-01-17      강보람       최초 생성
+ * 수정일           수정자          수정내용
+ * -------------------------------------------------------
+ * 2026-01-17      강보람          최초 생성
+ * 2026-03-04      강보람          JPA -> MyBatis 변경
  * </pre>
  */
+
 public class UserDTO {
 
     @NoArgsConstructor
@@ -30,6 +29,8 @@ public class UserDTO {
     @Setter
     public static class RegistRequest { // 회원가입 요청 데이터
 
+        private String userKey;
+
         @NotBlank(message = "{valid.user.id.required}")
         @Pattern(regexp = "^[a-z0-9]{4,20}$", message = "{valid.user.id.pattern}")
         private String loginId;
@@ -37,6 +38,8 @@ public class UserDTO {
         @NotBlank(message = "{valid.user.pswd.required}")
         @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[$@!%*#?&])[A-Za-z\\d$@!%*#?&]{8,16}$", message = "{valid.user.pswd.pattern}")
         private String pswd;
+
+        private String encPswd;
 
         @NotBlank(message = "{valid.user.nm.required}")
         private String userNm;
@@ -56,53 +59,11 @@ public class UserDTO {
         private String gender;
 
         @NotNull(message = "{valid.user.brth.required}")
-        private LocalDateTime userBrth;
+        private String userBrth;
 
         private String zipCd;
         private String addr;
         private String addrDtl;
-
-        public User toEntity(String encPswd, String userKey) {
-            return User.builder()
-                    .loginId(this.loginId)
-                    .userKey(userKey)
-                    .userNm(this.userNm)
-                    .userBrth(this.userBrth)
-                    .telPhone(this.telPhone)
-                    .gender(this.gender)
-                    .pswd(encPswd)
-                    .email(this.email)
-                    .nickname(this.nickname)
-                    .zipCd(this.zipCd)
-                    .addr(this.addr)
-                    .addrDtl(this.addrDtl)
-                    .build();
-        }
-    }
-
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Getter
-    @Builder
-    public static class Response { // 회원 정보 응답 데이터
-        private String userKey;
-        private String loginId;
-        private String userNm;
-        private String nickname;
-        private String email;
-        private LocalDateTime cretDt;
-
-        // Entity -> DTO 변환
-        public static Response toDTO(User user) {
-            return Response.builder()
-                    .userKey(user.getUserKey())
-                    .loginId(user.getLoginId())
-                    .userNm(user.getUserNm())
-                    .nickname(user.getNickname())
-                    .email(user.getEmail())
-                    .cretDt(user.getCretDt())
-                    .build();
-        }
     }
 
     @Getter
@@ -114,5 +75,18 @@ public class UserDTO {
 
         @NotBlank(message = "{valid.user.pswd.required}")
         private String pswd;
+    }
+
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Getter
+    @Builder
+    public static class UserInfo { // 회원 정보 응답 데이터
+        private String userKey;
+        private String pswd;
+        private String loginId;
+        private String userNm;
+        private String nickname;
+        private String email;
     }
 }

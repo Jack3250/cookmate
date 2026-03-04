@@ -13,15 +13,15 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * @file        UserController.java
- * @description 사용자 정보 API 컨트롤러
+ * @description 사용자 정보 컨트롤러 정의
  * @author      강보람
  * @since       2026-01-17
  * @version     1.0
  *
  * <pre>
- * 수정일          수정자          수정내용
- * ----------    ----------    ---------------------------
- * 2026-01-17      강보람       최초 생성
+ * 수정일           수정자          수정내용
+ * -------------------------------------------------------
+ * 2026-01-17      강보람          최초 생성
  * </pre>
  */
 
@@ -33,36 +33,36 @@ public class UserController {
     private final UserService userService;
 
     /**
-     * 회원가입 API
-     * @param request 사용자가 입력한 회원 정보
-     * @return 생성된 회원 정보
+     * 회원가입
+     * @param request 회원 정보
+     * @return ok 응답상태
      */
     @PostMapping("/regist")
-    public ResponseEntity<UserDTO.Response> regist(@Valid @RequestBody UserDTO.RegistRequest request) {
-        UserDTO.Response response = userService.regist(request);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<Void> regist(@Valid @RequestBody UserDTO.RegistRequest request) {
+        userService.insertUser(request);
+        return ResponseEntity.ok().build();
     }
 
     /**
-     * 로그인 API
-     * @param loginRequest 사용자가 입력한 아이디, 비밀번호 정보
+     * 로그인
+     * @param loginRequest 아이디, 비밀번호
      * @return 로그인 회원 정보
      */
     @PostMapping("/login")
-    public ResponseEntity<UserDTO.Response> login(@Valid @RequestBody UserDTO.LoginRequest loginRequest) {
-        UserDTO.Response response = userService.login(loginRequest);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<UserDTO.UserInfo> login(@Valid @RequestBody UserDTO.LoginRequest loginRequest) {
+        UserDTO.UserInfo userInfo = userService.login(loginRequest);
+        return ResponseEntity.ok(userInfo);
     }
 
     /**
-     * 로그아웃 API
+     * 로그아웃
      * @param session 세션
-     * @return 로그아웃 메시지
+     * @return ok 응답상태
      */
     @PostMapping("/logout")
-    public ResponseEntity<String> logout(HttpSession session) {
+    public ResponseEntity<Void> logout(HttpSession session) {
         session.invalidate(); // 세션 삭제
-        return ResponseEntity.ok("로그아웃 되었습니다.");
+        return ResponseEntity.ok().build();
     }
 
 }

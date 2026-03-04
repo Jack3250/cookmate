@@ -5,8 +5,7 @@ import com.cookmate.cookmate_web.domain.global.error.CustomException;
 import com.cookmate.cookmate_web.domain.global.error.ErrorCode;
 import com.cookmate.cookmate_web.domain.users.dto.SessionUser;
 import com.cookmate.cookmate_web.domain.users.dto.UserDTO;
-import com.cookmate.cookmate_web.domain.users.entity.User;
-import com.cookmate.cookmate_web.domain.users.repository.UserRepository;
+import com.cookmate.cookmate_web.domain.users.mapper.UserMapper;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -15,32 +14,31 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @file        UserService.java
- * @description 사용자 정보 API 서비스
+ * @description 사용자 정보 서비스 정의
  * @author      강보람
  * @since       2026-01-17
  * @version     1.0
  *
  * <pre>
- * 수정일          수정자          수정내용
- * ----------    ----------    ---------------------------
- * 2026-01-17      강보람       최초 생성
+ * 수정일           수정자          수정내용
+ * -------------------------------------------------------
+ * 2026-01-17      강보람          최초 생성
  * </pre>
  */
 @Service
 @RequiredArgsConstructor
 public class UserService {
 
-    private final UserRepository userRepository;
+    private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final HttpSession httpSession;
 
     /**
-     * 회원가입 로직
-     * @param request 회원가입 요청 데이터
-     * @return 생성된 회원 응답 데이터
+     * 회원가입
+     * @param request 회원 정보
      */
     @Transactional
-    public UserDTO.Response regist(UserDTO.RegistRequest request) {
+    public void insertUser(UserDTO.RegistRequest request) {
 
         // 아이디 중복 체크
         validateDuplicateLoginId(request.getLoginId());
@@ -52,20 +50,21 @@ public class UserService {
         String userKey = KeygenUtil.generateKey();
         String encPswd = passwordEncoder.encode(request.getPswd());
 
-        // DTO -> Entity 변환
-        User user = request.toEntity(encPswd, userKey);
+        request.setUserKey(userKey);
+        request.setEncPswd(encPswd);
 
         // DB 저장
-        User savedUser = userRepository.save(user);
-
-        // Entity -> Response DTO 변환 후 반환
-        return UserDTO.Response.toDTO(savedUser);
+        userMapper.insertUser(request);
     }
 
-    public UserDTO.Response login(UserDTO.LoginRequest loginRequest) {
+    /**
+     * 로그인
+     * @param loginRequest 아이디, 비밀번호
+     * @return 로그인 회원 정보
+     */
+    public UserDTO.UserInfo login(UserDTO.LoginRequest loginRequest) {
         // 아이디 없음
-        User user = userRepository.findByLoginId(loginRequest.getLoginId())
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        UserDTO.UserInfo user = userMapper.selectUserInfo(loginRequest.getLoginId());
 
         // 비밀번호 비교 (입력 비번 vs DB 암호화 비번)
         if (!passwordEncoder.matches(loginRequest.getPswd(), user.getPswd())) {
@@ -75,18 +74,31 @@ public class UserService {
         // 세션에 사용자 정보 저장
         httpSession.setAttribute("USER_SESSION", new SessionUser(user));
 
-        return UserDTO.Response.toDTO(user);
+        return user;
     }
 
+    /*
+     * =======================
+     * 헬퍼 메소드
+     * =======================
+     */
+    /**
+     * 아이디 중복 체크
+     * @param loginId 로그인 아이디
+     */
     public void validateDuplicateLoginId(String loginId) {
-        userRepository.findByLoginId(loginId).ifPresent(m -> {
+        if (userMapper.selectLoginId(loginId) != null) {
             throw new CustomException(ErrorCode.DUPLICATE_VALUE, new Object[]{"아이디"});
-        });
+        }
     }
 
+    /**
+     * 이메일 중복 체크
+     * @param email 이메일
+     */
     public void validateDuplicateEmail(String email) {
-        userRepository.findByEmail(email).ifPresent(m -> {
+        if (userMapper.selectEmail(email) != null) {
             throw new CustomException(ErrorCode.DUPLICATE_VALUE, new Object[]{"이메일"});
-        });
+        }
     }
 }
