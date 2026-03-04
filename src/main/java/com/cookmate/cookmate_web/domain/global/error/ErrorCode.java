@@ -4,17 +4,17 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
- * @author 강보람
- * @version 1.0
+ * @file        ErrorCode.java
+ * @description 에러코드 정의
+ * @author      강보람
+ * @since       2026-01-18
+ * @version     1.0
  *
  * <pre>
- * 수정일          수정자          수정내용
- * ----------    ----------    ---------------------------
- * 2026-01-18      강보람       최초 생성
+ * 수정일           수정자          수정내용
+ * -------------------------------------------------------
+ * 2026-01-18      강보람          최초 생성
  * </pre>
- * @file ErrorCode.java
- * @description 에러코드 정의
- * @since 2026-01-18
  */
 
 @Getter

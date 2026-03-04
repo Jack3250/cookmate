@@ -1,13 +1,23 @@
 package com.cookmate.cookmate_web.domain.global.config;
 
-import com.cookmate.cookmate_web.domain.global.config.auth.LoginUserArgumentResolver;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import java.util.List;
+/**
+ * @file        WebMvcConfig.java
+ * @description MVC Config 정의
+ * @author      강보람
+ * @since       2026-01-18
+ * @version     1.0
+ *
+ * <pre>
+ * 수정일           수정자          수정내용
+ * -------------------------------------------------------
+ * 2026-01-18      강보람          최초 생성
+ * </pre>
+ */
 
 @Configuration
 @RequiredArgsConstructor

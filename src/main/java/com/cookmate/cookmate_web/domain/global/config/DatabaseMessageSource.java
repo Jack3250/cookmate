@@ -1,7 +1,7 @@
 package com.cookmate.cookmate_web.domain.global.config;
 
-import com.cookmate.cookmate_web.domain.common.entity.CmmnMsg;
-import com.cookmate.cookmate_web.domain.common.repository.CmmnMsgRepository;
+import com.cookmate.cookmate_web.domain.common.dto.CmmnMsgDTO;
+import com.cookmate.cookmate_web.domain.common.mapper.CmmnMsgMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.support.AbstractMessageSource;
 import org.springframework.stereotype.Component;
@@ -17,21 +17,21 @@ import java.util.Locale;
  * @version     1.0
  *
  * <pre>
- * 수정일          수정자          수정내용
- * ----------    ----------    ---------------------------
- * 2026-01-17      강보람       최초 생성
+ * 수정일           수정자          수정내용
+ * -------------------------------------------------------
+ * 2026-01-17      강보람          최초 생성
  * </pre>
  */
 @Component("messageSource")
 @RequiredArgsConstructor
 public class DatabaseMessageSource extends AbstractMessageSource {
 
-    private final CmmnMsgRepository cmmnMsgRepository;
+    private final CmmnMsgMapper cmmnMsgMapper;
 
     @Override
     protected MessageFormat resolveCode(String code, Locale locale) {
         // DB에서 msg_cd(code)로 메시지 조회
-        CmmnMsg message = cmmnMsgRepository.findById(code).orElse(null);
+        CmmnMsgDTO message = cmmnMsgMapper.selectCmmnMsg(code);
 
         if (message == null) {
             return null; // 메시지가 없으면 기본값 사용 시도

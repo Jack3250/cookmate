@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cookmate.cookmate_web.domain.common.mapper.CmmnMsgMapper">
+
+    <select id="selectCmmnMsg" parameterType="string" resultType="com.cookmate.cookmate_web.domain.common.dto.CmmnMsgDTO">
+        SELECT /* cmmnMsgMapper.selectCmmnMsg => 공통 메세지 단건 조회 */
+            MSG_CD,
+            MSG_CN,
+            MSG_TY,
+            RGTR_KEY,
+            REG_DT,
+            MDFR_KEY,
+            MDFCN_DT
+        FROM CMMN_MSG
+        WHERE MSG_CD = #{msgCd}
+    </select>
+
+</mapper>
