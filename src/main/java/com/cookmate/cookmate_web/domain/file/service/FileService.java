@@ -1,10 +1,8 @@
 package com.cookmate.cookmate_web.domain.file.service;
 
 import com.cookmate.cookmate_web.domain.common.util.KeygenUtil;
-import com.cookmate.cookmate_web.domain.file.entity.FileDetail;
-import com.cookmate.cookmate_web.domain.file.entity.FileGroup;
-import com.cookmate.cookmate_web.domain.file.repository.FileDetailRepository;
-import com.cookmate.cookmate_web.domain.file.repository.FileGroupRepository;
+import com.cookmate.cookmate_web.domain.file.dto.FileDTO;
+import com.cookmate.cookmate_web.domain.file.mapper.FileMapper;
 import com.cookmate.cookmate_web.domain.global.error.CustomException;
 import com.cookmate.cookmate_web.domain.global.error.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -31,9 +29,9 @@ import java.util.UUID;
  * @version     1.0
  *
  * <pre>
- * 수정일          수정자          수정내용
- * ----------    ----------    ---------------------------
- * 2026-01-22      강보람       최초 생성
+ * 수정일           수정자          수정내용
+ * -------------------------------------------------------
+ * 2026-01-22      강보람          최초 생성
  * </pre>
  */
 
@@ -42,8 +40,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class FileService {
 
-    private final FileDetailRepository fileDetailRepository;
-    private final FileGroupRepository fileGroupRepository;
+    private final FileMapper fileMapper;
 
     @Value("${file.upload-dir}")
     private String uploadDir;
@@ -62,22 +59,26 @@ public class FileService {
             return fileGrpId;
         }
 
-        FileGroup fileGroup;
+        FileDTO.FileGroupInfo fileGroupInfo;
         String folderPath;
 
         // FileGroup 조회 또는 생성
         if (fileGrpId == null) {
             folderPath = getFolder();
-            FileGroup newGroup = FileGroup.builder()
-                    .fileGrpId(KeygenUtil.generateKey())
-                    .filePath(folderPath)
-                    .rgtrKey(rgtrKey)
-                    .build();
-            fileGroup = fileGroupRepository.save(newGroup);
+
+            fileGroupInfo = new FileDTO.FileGroupInfo();
+
+            fileGroupInfo.setFileGrpId(KeygenUtil.generateKey());
+            fileGroupInfo.setFilePath(folderPath);
+            fileGroupInfo.setRgtrKey(rgtrKey);
+
+            fileMapper.insertFileGroup(fileGroupInfo);
         } else { // 기존 파일 그룹 ID가 있을 경우
-            fileGroup = fileGroupRepository.findFileGroup(fileGrpId)
-                    .orElseThrow(() -> new CustomException(ErrorCode.FILE_NOT_FOUND));
-            folderPath = fileGroup.getFilePath();
+            fileGroupInfo = fileMapper.selectFileGroup(fileGrpId);
+            if (fileGroupInfo == null) {
+                throw new CustomException(ErrorCode.FILE_NOT_FOUND);
+            }
+            folderPath = fileGroupInfo.getFilePath();
         }
 
         // 디렉토리 확인 및 생성
@@ -90,7 +91,7 @@ public class FileService {
         }
 
         // 순번 계산 (기존 개수 + 1)
-        int fileOdr = fileDetailRepository.countActiveFiles(fileGroup) + 1;
+        int fileOdr = fileMapper.countActiveFiles(fileGroupInfo.getFileGrpSeq()) + 1;
 
         // 파일 저장 반복
         for (MultipartFile file : files) {
@@ -110,21 +111,21 @@ public class FileService {
                 throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
             }
 
-            FileDetail fileDetail = FileDetail.builder()
-                    .fileGroup(fileGroup)
-                    .fileId(KeygenUtil.generateKey())
-                    .fileOrgNm(fileOrgNm)
-                    .fileSaveNm(fileSaveNm)
-                    .fileExt(fileExt)
-                    .fileSize(file.getSize())
-                    .fileOdr(fileOdr++)
-                    .rgtrKey(rgtrKey)
-                    .build();
+            FileDTO.FileDetailInfo fileDetail = new FileDTO.FileDetailInfo();
 
-            fileDetailRepository.save(fileDetail);
+            fileDetail.setFileGrpSeq(fileGroupInfo.getFileGrpSeq()); // 연관된 파일 그룹의 PK
+            fileDetail.setFileId(KeygenUtil.generateKey());
+            fileDetail.setFileOrgNm(fileOrgNm);
+            fileDetail.setFileSaveNm(fileSaveNm);
+            fileDetail.setFileExt(fileExt);
+            fileDetail.setFileSize(file.getSize());
+            fileDetail.setFileOdr(fileOdr++);
+            fileDetail.setRgtrKey(rgtrKey);
+
+            fileMapper.insertFileDetail(fileDetail);
         }
 
-        return fileGroup.getFileGrpId();
+        return fileGroupInfo.getFileGrpId();
     }
 
     /**
@@ -132,9 +133,12 @@ public class FileService {
      * @param fileId 파일 Id
      * @return 파일 상세 정보
      */
-    public FileDetail getFileDetail(String fileId) {
-        return fileDetailRepository.findByFileIdAndDelYn(fileId)
-                .orElseThrow(() -> new CustomException(ErrorCode.FILE_NOT_FOUND));
+    public FileDTO.FileDetailInfo getFileDetail(String fileId) {
+        FileDTO.FileDetailInfo fileDetail = fileMapper.selectFileDetail(fileId);
+        if (fileDetail == null) {
+            throw new CustomException(ErrorCode.FILE_NOT_FOUND);
+        }
+        return fileDetail;
     }
 
     /**
@@ -142,9 +146,14 @@ public class FileService {
      * @param fileId 파일 Id
      * @return 파일 객체
      */
-    public File getFileObject(String fileId) {
-        FileDetail fileDetail = getFileDetail(fileId);
-        FileGroup fileGroup = fileDetail.getFileGroup(); // 연관된 그룹 정보
+    public File getFile(String fileId) {
+        FileDTO.FileDetailInfo fileDetail = getFileDetail(fileId);
+
+        // 연관된 그룹 정보를 PK(fileGrpId)로 조회
+        FileDTO.FileGroupInfo fileGroup = fileMapper.selectFileGroup(fileDetail.getFileId());
+        if (fileGroup == null) {
+            throw new CustomException(ErrorCode.FILE_NOT_FOUND);
+        }
 
         String fullPath = uploadDir + fileGroup.getFilePath() + File.separator + fileDetail.getFileSaveNm();
 
@@ -162,11 +171,13 @@ public class FileService {
     @Transactional
     public void deleteFile(String fileId) {
         // 이미 삭제된 파일인지 체크
-        FileDetail fileDetail = fileDetailRepository.findByFileIdAndDelYn(fileId)
-                .orElseThrow(() -> new CustomException(ErrorCode.FILE_NOT_FOUND));
+        FileDTO.FileDetailInfo fileDetail = fileMapper.selectFileDetail(fileId);
+        if (fileDetail == null) {
+            throw new CustomException(ErrorCode.FILE_NOT_FOUND);
+        }
 
-        // 파일 삭제 처리
-        fileDetail.deleteFile();
+        // 명시적 파일 삭제 처리 (UPDATE DEL_YN = 'Y')
+        fileMapper.deleteFileDetail(fileId);
     }
 
     /**
@@ -176,14 +187,16 @@ public class FileService {
     @Transactional
     public void deleteFileGroup(String fileGrpId) {
         // 그룹 존재 확인
-        FileGroup fileGroup = fileGroupRepository.findFileGroup(fileGrpId)
-                .orElseThrow(() -> new CustomException(ErrorCode.FILE_NOT_FOUND));
+        FileDTO.FileGroupInfo fileGroup = fileMapper.selectFileGroup(fileGrpId);
+        if (fileGroup == null) {
+            throw new CustomException(ErrorCode.FILE_NOT_FOUND);
+        }
 
         // 하위 파일들 일괄 삭제
-        fileDetailRepository.deleteAllByFileGrpSeq(fileGroup.getFileGrpSeq());
+        fileMapper.deleteAllFileDetail(fileGroup.getFileGrpSeq());
 
         // 그룹 삭제
-        fileGroup.deleteFileGrp();
+        fileMapper.deleteFileGroup(fileGrpId);
     }
 
     /**
@@ -204,7 +217,7 @@ public class FileService {
 
         // 새로 추가된 파일들 저장
         if (newFiles != null && !newFiles.isEmpty()) {
-            saveFile(newFiles, fileGrpId, rgtrKey); // 기존 saveFiles 재활용 (그룹ID가 있으므로 추가됨)
+            saveFile(newFiles, fileGrpId, rgtrKey); // 기존 saveFile 재활용
         }
     }
 
@@ -220,12 +233,14 @@ public class FileService {
             return result;
         }
 
-        FileGroup fileGroup = fileGroupRepository.findFileGroup(fileGrpId)
-                .orElseThrow(() -> new CustomException(ErrorCode.FILE_NOT_FOUND));
+        FileDTO.FileGroupInfo fileGroup = fileMapper.selectFileGroup(fileGrpId);
+        if (fileGroup == null) {
+            throw new CustomException(ErrorCode.FILE_NOT_FOUND);
+        }
 
-        List<FileDetail> fileDetailList = fileDetailRepository.findAllActiveFiles(fileGroup);
+        List<FileDTO.FileDetailInfo> fileDetailList = fileMapper.selectAllFiles(fileGroup.getFileGrpSeq());
 
-        for(FileDetail fileDetail : fileDetailList) {
+        for(FileDTO.FileDetailInfo fileDetail : fileDetailList) {
             String fileUrls = "/files/view/" + fileDetail.getFileId();
             result.add(fileUrls);
         }

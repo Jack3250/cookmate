@@ -1,6 +1,6 @@
 package com.cookmate.cookmate_web.domain.file.controller;
 
-import com.cookmate.cookmate_web.domain.file.entity.FileDetail;
+import com.cookmate.cookmate_web.domain.file.dto.FileDTO;
 import com.cookmate.cookmate_web.domain.file.service.FileService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,9 +27,9 @@ import java.util.List;
  * @version     1.0
  *
  * <pre>
- * 수정일          수정자          수정내용
- * ----------    ----------    ---------------------------
- * 2026-01-24      강보람       최초 생성
+ * 수정일           수정자          수정내용
+ * -------------------------------------------------------
+ * 2026-01-24      강보람          최초 생성
  * </pre>
  */
 
@@ -63,12 +63,11 @@ public class FileController {
      * 파일 다운로드
      * @param fileId 파일 ID
      * @return 파일 다운로드
-     * @throws IOException 파일 다운로드 실패 시
      */
     @GetMapping("/download/{fileId}")
-    public ResponseEntity<Resource> downloadFile(@PathVariable String fileId) throws IOException {
-        FileDetail fileDetail = fileService.getFileDetail(fileId);
-        File file = fileService.getFileObject(fileId);
+    public ResponseEntity<Resource> downloadFile(@PathVariable String fileId) {
+        FileDTO.FileDetailInfo fileDetail = fileService.getFileDetail(fileId);
+        File file = fileService.getFile(fileId);
         Resource resource = new FileSystemResource(file);
 
         ContentDisposition contentDisposition = ContentDisposition.builder("attachment")
@@ -90,7 +89,7 @@ public class FileController {
      */
     @GetMapping("/view/{fileId}")
     public ResponseEntity<Resource> viewImage(@PathVariable String fileId) throws IOException {
-        File file = fileService.getFileObject(fileId);
+        File file = fileService.getFile(fileId);
         Resource resource = new FileSystemResource(file);
 
         // 파일의 MIME 타입 추출

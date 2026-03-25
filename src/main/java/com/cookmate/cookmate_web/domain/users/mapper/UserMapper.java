@@ -20,6 +20,11 @@ import org.apache.ibatis.annotations.Mapper;
 @Mapper
 public interface UserMapper {
 
+    /*
+     * =======================
+     * 회원가입/로그인
+     * =======================
+     */
     /**
      * 회원가입
      * @param request 회원 정보

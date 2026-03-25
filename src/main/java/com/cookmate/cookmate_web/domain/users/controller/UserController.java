@@ -32,6 +32,11 @@ public class UserController {
 
     private final UserService userService;
 
+    /*
+     * =======================
+     * 회원가입/로그인
+     * =======================
+     */
     /**
      * 회원가입
      * @param request 회원 정보

@@ -2,9 +2,13 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.cookmate.cookmate_web.domain.users.mapper.UserMapper">
 
+    <!--
+    =======================
+    회원가입/로그인
+    =======================
+    -->
     <insert id="insertUser" parameterType="com.cookmate.cookmate_web.domain.users.dto.UserDTO$RegistRequest">
-        INSERT INTO /* userMapper.insertUser => 회원가입 */
-        USERS (
+        INSERT INTO USERS ( /* userMapper.insertUser => 회원가입 */
             LOGIN_ID, USER_KEY, USER_NM, USER_BRTH, ZIP_CD, ADDR, ADDR_DTL,
             TEL_PHONE, GENDER, PSWD, PSWD_ERR_CNT, EMAIL, NICKNAME, CRET_DT, DEL_YN
         ) VALUES (
@@ -20,15 +24,21 @@
         WHERE LOGIN_ID = #{loginId}
         AND DEL_YN = 'N'
     </select>
-    <select id="selectLoginId" resultType="com.cookmate.cookmate_web.domain.users.dto.UserDTO$UserInfo">
-        SELECT * /* userMapper.selectLoginId => 아이디 중복 체크 */
+
+    <!--
+    =======================
+    헬퍼 메소드
+    =======================
+    -->
+    <select id="selectLoginId" parameterType="string" resultType="com.cookmate.cookmate_web.domain.users.dto.UserDTO$UserInfo">
+        SELECT USER_SEQ /* userMapper.selectLoginId => 아이디 중복 체크 */
         FROM USERS
         WHERE LOGIN_ID = #{loginId}
         AND DEL_YN = 'N'
     </select>
 
-    <select id="selectEmail" resultType="com.cookmate.cookmate_web.domain.users.dto.UserDTO$UserInfo">
-        SELECT * /* userMapper.selectEmail => 이메일 중복 체크 */
+    <select id="selectEmail" parameterType="string" resultType="com.cookmate.cookmate_web.domain.users.dto.UserDTO$UserInfo">
+        SELECT USER_SEQ /* userMapper.selectEmail => 이메일 중복 체크 */
         FROM USERS
         WHERE EMAIL = #{email}
         AND DEL_YN = 'N'

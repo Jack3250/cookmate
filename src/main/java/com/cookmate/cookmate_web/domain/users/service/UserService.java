@@ -33,6 +33,11 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final HttpSession httpSession;
 
+    /*
+     * =======================
+     * 회원가입/로그인
+     * =======================
+     */
     /**
      * 회원가입
      * @param request 회원 정보
