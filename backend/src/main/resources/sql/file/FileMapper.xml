@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cookmate.cookmate_web.domain.file.mapper.FileMapper">
+
+    <!--
+    =======================
+    파일 그룹
+    =======================
+    -->
+    <insert id="insertFileGroup" parameterType="com.cookmate.cookmate_web.domain.file.dto.FileDTO$FileGroupInfo" useGeneratedKeys="true" keyProperty="fileGrpSeq">
+        INSERT INTO FILE_GROUP ( /* fileMapper.insertFileGroup => 파일 그룹 등록 */
+            FILE_GRP_ID, FILE_PATH, RGTR_KEY, REG_DT, DEL_YN
+        ) VALUES (
+            #{fileGrpId}, #{filePath}, #{rgtrKey}, CURRENT_TIMESTAMP, 'N'
+        )
+    </insert>
+
+    <select id="selectFileGroup" parameterType="string" resultType="com.cookmate.cookmate_web.domain.file.dto.FileDTO$FileGroupInfo">
+        SELECT /* fileMapper.selectFileGroup => 파일 그룹 조회 */
+            FILE_GRP_SEQ, FILE_GRP_ID, FILE_PATH, RGTR_KEY, REG_DT, DEL_YN
+        FROM FILE_GROUP
+        WHERE FILE_GRP_ID = #{fileGrpId}
+        AND DEL_YN = 'N'
+    </select>
+
+    <update id="deleteFileGroup" parameterType="string">
+        UPDATE FILE_GROUP /* fileMapper.deleteFileGroup => 파일 그룹 삭제 */
+        SET DEL_YN = 'Y'
+        WHERE FILE_GRP_ID = #{fileGrpId}
+    </update>
+
+    <!--
+    =======================
+    파일 상세
+    =======================
+    -->
+    <insert id="insertFileDetail" parameterType="com.cookmate.cookmate_web.domain.file.dto.FileDTO$FileDetailInfo">
+        INSERT INTO FILE_DETAIL ( /* fileMapper.insertFileDetail => 파일 상세 등록 */
+            FILE_GRP_SEQ, FILE_ID, FILE_ORG_NM, FILE_SAVE_NM, FILE_EXT,
+            FILE_SIZE, FILE_ODR, RGTR_KEY, REG_DT, DEL_YN
+        ) VALUES (
+            #{fileGrpSeq}, #{fileId}, #{fileOrgNm}, #{fileSaveNm}, #{fileExt},
+            #{fileSize}, #{fileOdr}, #{rgtrKey}, CURRENT_TIMESTAMP, 'N'
+        )
+    </insert>
+
+    <select id="countActiveFiles" parameterType="long" resultType="int">
+        SELECT /* fileMapper.countActiveFiles => 해당 그룹 미삭제 파일 수 조회 */
+            COUNT(*) FROM FILE_DETAIL
+        WHERE FILE_GRP_SEQ = #{fileGrpSeq} AND DEL_YN = 'N'
+    </select>
+
+    <select id="selectAllFiles" parameterType="long" resultType="com.cookmate.cookmate_web.domain.file.dto.FileDTO$FileDetailInfo">
+        SELECT /* fileMapper.selectAllFiles => 파일 목록 조회 */
+            FILE_SEQ,
+            FILE_GRP_SEQ,
+            FILE_ID,
+            FILE_ORG_NM,
+            FILE_SAVE_NM,
+            FILE_EXT,
+            FILE_SIZE,
+            FILE_ODR,
+            RGTR_KEY,
+            REG_DT,
+            DEL_YN,
+            DEL_DT
+        FROM FILE_DETAIL
+        WHERE FILE_GRP_SEQ = #{fileGrpSeq}
+          AND DEL_YN = 'N'
+        ORDER BY FILE_ODR
+    </select>
+
+    <select id="selectFileDetail" parameterType="string" resultType="com.cookmate.cookmate_web.domain.file.dto.FileDTO$FileDetailInfo">
+        SELECT /* fileMapper.selectFileDetail => 파일 상세 조회 */
+            FILE_SEQ,
+            FILE_GRP_SEQ,
+            FILE_ID,
+            FILE_ORG_NM,
+            FILE_SAVE_NM,
+            FILE_EXT,
+            FILE_SIZE,
+            FILE_ODR,
+            RGTR_KEY,
+            REG_DT,
+            DEL_YN,
+            DEL_DT
+        FROM FILE_DETAIL
+        WHERE FILE_ID = #{fileId} AND DEL_YN = 'N'
+    </select>
+
+    <update id="deleteFileDetail" parameterType="string">
+        UPDATE FILE_DETAIL /* fileMapper.deleteFileDetail => 파일 삭제 */
+        SET DEL_YN = 'Y', DEL_DT = CURRENT_TIMESTAMP
+        WHERE FILE_ID = #{fileId}
+    </update>
+
+    <update id="deleteAllFileDetail" parameterType="long">
+        UPDATE FILE_DETAIL /* fileMapper.deleteAllFileDetail => 파일 그룹에 해당하는 파일 삭제 */
+        SET DEL_YN = 'Y', DEL_DT = CURRENT_TIMESTAMP
+        WHERE FILE_GRP_SEQ = #{fileGrpSeq}
+    </update>
+
+    <select id="selectOldDeletedFiles" parameterType="string" resultType="com.cookmate.cookmate_web.domain.file.dto.FileDTO$FileDetailInfo">
+        SELECT /* fileMapper.selectOldDeletedFiles => 삭제한지 오래된 파일 조회 */
+            FILE_SEQ,
+            FILE_GRP_SEQ,
+            FILE_ID,
+            FILE_ORG_NM,
+            FILE_SAVE_NM,
+            FILE_EXT,
+            FILE_SIZE,
+            FILE_ODR,
+            RGTR_KEY,
+            REG_DT,
+            DEL_YN,
+            DEL_DT
+        FROM FILE_DETAIL
+        WHERE DEL_YN = 'Y' AND DEL_DT &lt; CAST(#{standardDt} AS TIMESTAMP)
+    </select>
+
+    <delete id="deletePhysicalFileDetail">
+        DELETE FROM FILE_DETAIL
+        WHERE FILE_ID = #{fileId}
+    </delete>
+</mapper>
