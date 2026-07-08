@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cookmate.cookmate_web.domain.recipe.mapper.RecipeMapper">
+
+    <insert id="insertRecipeInfo" parameterType="com.cookmate.cookmate_web.domain.recipe.dto.RecipeRequestDTO$Request" useGeneratedKeys="true" keyProperty="recipeSeq">
+        /* RecipeMapper.insertRecipeInfo : 레시피 정보 등록 */
+        INSERT INTO RECIPE (
+            RECIPE_ID, RECIPE_TTL, DISH_NM, RECIPE_CN, COOKING_TIME, RECIPE_DIFFICULT_CD,
+            CATEGORY_CD, FILE_GRP_ID, RGTR_KEY, RECIPE_STATUS
+        ) VALUES (
+            #{recipeId}, #{recipeTtl}, #{dishNm}, #{recipeCn}, #{cookingTime}, #{recipeDifficultCd},
+            #{categoryCd}, #{fileGrpId}, #{rgtrKey}, #{recipeStatus}
+        )
+    </insert>
+
+    <insert id="insertRecipeIngredient" parameterType="com.cookmate.cookmate_web.domain.recipe.dto.RecipeRequestDTO$Ingredient">
+        /* RecipeMapper.insertRecipeIngredient : 레시피 재료 정보 등록 */
+        INSERT INTO INGREDIENT (
+            RECIPE_SEQ, INGRD_NM, INGRD_AMT, INGRD_UNT
+        ) VALUES (
+            #{recipeSeq}, #{ingrdNm}, #{ingrdAmt}, #{ingrdUnt}
+        )
+    </insert>
+
+    <insert id="insertRecipeStep" parameterType="com.cookmate.cookmate_web.domain.recipe.dto.RecipeRequestDTO$Step">
+        /* RecipeMapper.insertRecipeStep : 레시피 단계 정보 등록 */
+        INSERT INTO RECIPE_STEP (
+            RECIPE_SEQ, STEP_NO, STEP_CN, FILE_GRP_ID
+        ) VALUES (
+            #{recipeSeq}, #{stepNo}, #{stepCn}, #{fileGrpId}
+        )
+    </insert>
+
+    <select id="selectRecipeInfoList" resultType="com.cookmate.cookmate_web.domain.recipe.dto.RecipeResponseDTO$Summary">
+        /* RecipeMapper.selectRecipeInfoList : 레시피 정보 목록 조회 */
+        SELECT
+            R.RECIPE_ID,
+            R.RECIPE_TTL,
+            R.DISH_NM,
+            R.FILE_GRP_ID,
+            U.USER_NM AS writer_name,
+            R.VIEW_CNT,
+            R.CATEGORY_CD,
+            R.RECIPE_DIFFICULT_CD,
+            R.REG_DT
+        FROM RECIPE R
+        JOIN USERS U ON R.RGTR_KEY = U.USER_KEY
+        WHERE R.DEL_YN = 'N'
+        ORDER BY R.REG_DT DESC
+    </select>
+
+    <select id="retrieveRecipeInfo" parameterType="string" resultType="com.cookmate.cookmate_web.domain.recipe.dto.RecipeResponseDTO$Detail">
+        /* RecipeMapper.retrieveRecipeInfo : 레시피 정보 상세 조회 */
+        SELECT
+            R.RECIPE_SEQ,
+            R.RECIPE_ID,
+            R.RECIPE_TTL,
+            R.DISH_NM,
+            R.RECIPE_CN,
+            R.COOKING_TIME,
+            R.RECIPE_DIFFICULT_CD,
+            R.CATEGORY_CD,
+            R.VIEW_CNT,
+            U.USER_NM AS writer_name,
+            R.REG_DT,
+            R.RECIPE_STATUS,
+            R.FILE_GRP_ID
+        FROM RECIPE R
+        JOIN USERS U ON R.RGTR_KEY = U.USER_KEY
+        WHERE R.RECIPE_ID = #{recipeId}
+        AND R.DEL_YN = 'N'
+    </select>
+
+    <select id="selectRecipeIngredientList" parameterType="long" resultType="com.cookmate.cookmate_web.domain.recipe.dto.RecipeResponseDTO$Ingredient">
+        /* RecipeMapper.selectRecipeIngredientList : 레시피 재료 목록 조회 */
+        SELECT
+            INGRD_NM,
+            INGRD_AMT,
+            INGRD_UNT
+        FROM INGREDIENT
+        WHERE RECIPE_SEQ = #{recipeSeq}
+        AND DEL_YN = 'N'
+    </select>
+
+    <select id="selectRecipeStepList" parameterType="long" resultType="com.cookmate.cookmate_web.domain.recipe.dto.RecipeResponseDTO$Step">
+        /* RecipeMapper.selectRecipeStepList : 레시피 단계 목록 조회 */
+        SELECT
+            STEP_NO,
+            STEP_CN,
+            FILE_GRP_ID
+        FROM RECIPE_STEP
+        WHERE RECIPE_SEQ = #{recipeSeq}
+        AND DEL_YN = 'N'
+        ORDER BY STEP_NO
+    </select>
+
+    <update id="updateRecipeInfo" parameterType="com.cookmate.cookmate_web.domain.recipe.dto.RecipeRequestDTO$Request">
+        /* RecipeMapper.updateRecipeInfo : 레시피 정보 수정 */
+        UPDATE RECIPE
+        SET
+            RECIPE_TTL = #{recipeTtl},
+            DISH_NM = #{dishNm},
+            RECIPE_CN = #{recipeCn},
+            COOKING_TIME = #{cookingTime},
+            RECIPE_DIFFICULT_CD = #{recipeDifficultCd},
+            CATEGORY_CD = #{categoryCd},
+            RECIPE_STATUS = #{recipeStatus},
+            FILE_GRP_ID = #{fileGrpId},
+            MDFCN_DT = CURRENT_TIMESTAMP
+        WHERE RECIPE_SEQ = #{recipeSeq}
+    </update>
+
+    <update id="deleteRecipeIngredientList" parameterType="long">
+        /* RecipeMapper.deleteRecipeIngredientList : 레시피 재료 정보 삭제 */
+        UPDATE INGREDIENT
+        SET
+            DEL_YN = 'Y'
+        WHERE RECIPE_SEQ = #{recipeSeq}
+    </update>
+
+    <update id="deleteRecipeStepList" parameterType="long">
+        /* RecipeMapper.deleteRecipeStepList : 레시피 단계 정보 삭제 */
+        UPDATE RECIPE_STEP
+        SET
+            DEL_YN = 'Y'
+        WHERE RECIPE_SEQ = #{recipeSeq}
+    </update>
+
+    <update id="deleteRecipeInfo" parameterType="string">
+        /* RecipeMapper.deleteRecipeInfo : 레시피 정보 삭제 */
+        UPDATE RECIPE
+        SET
+            DEL_YN = 'Y',
+            MDFCN_DT = CURRENT_TIMESTAMP
+        WHERE RECIPE_ID = #{recipeId}
+    </update>
+
+</mapper>

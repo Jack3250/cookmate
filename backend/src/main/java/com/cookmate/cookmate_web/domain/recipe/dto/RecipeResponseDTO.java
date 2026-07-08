@@ -1,109 +1,76 @@
 package com.cookmate.cookmate_web.domain.recipe.dto;
 
-import com.cookmate.cookmate_web.domain.recipe.entity.Ingredient;
-import com.cookmate.cookmate_web.domain.recipe.entity.Recipe;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-/**
- * @file        RecipeResponseDTO.java
- * @description 레시피 목록, 상세 응답 DTO
- * @author      강보람
- * @since       2026-01-26
- * @version     1.0
- *
- * <pre>
- * 수정일          수정자          수정내용
- * ----------    ----------    ---------------------------
- * 2026-01-26      강보람       최초 생성
- * </pre>
- */
- 
 public class RecipeResponseDTO {
-    // 목록 조회용
+
     @Getter
+    @Setter
     @Builder
     @AllArgsConstructor
     @NoArgsConstructor
     public static class Summary {
-        private String recipeId;
-        private String recipeTtl;
-        private String dishNm;
-        private String writerName;
-        private Integer viewCnt;
-        private String categoryCd;
-        private String recipeDifficultCd;
-        private LocalDateTime regDt;
-        private String mainImageUrl;
-
-        public static Summary from(Recipe recipe, String mainImageUrl) {
-            return Summary.builder()
-                    .recipeId(recipe.getRecipeId())
-                    .recipeTtl(recipe.getRecipeTtl())
-                    .dishNm(recipe.getDishNm())
-                    .writerName(recipe.getRgtrKey()) // 추후 닉네임 변경
-                    .viewCnt(recipe.getViewCnt())
-                    .categoryCd(recipe.getCategoryCd())
-                    .recipeDifficultCd(recipe.getRecipeDifficultCd())
-                    .mainImageUrl(mainImageUrl)
-                    .regDt(recipe.getRegDt())
-                    .build();
-        }
+        private String recipeId;          // 레시피 ID
+        private String recipeTtl;         // 레시피 제목
+        private String dishNm;            // 음식 명
+        private String writerName;        // 작성자 명
+        private Integer viewCnt;          // 조회 수
+        private String categoryCd;        // 카테고리 코드
+        private String recipeDifficultCd; // 레시피 난이도 코드
+        private LocalDateTime regDt;      // 등록 일시
+        private String mainImageUrl;      // 메인 이미지 URL
+        private String fileGrpId;         // 파일 그룹 ID
     }
 
-    // 상세 정보
     @Getter
+    @Setter
     @Builder
     @AllArgsConstructor
     @NoArgsConstructor
     public static class Detail {
-        private String recipeId;
-        private String recipeTtl;
-        private String dishNm;
-        private String recipeCn;
-        private Integer cookingTime;
-        private String recipeDifficultCd;
-        private String categoryCd;
-        private Integer viewCnt;
-        private String writerName;
-        private LocalDateTime regDt;
-        private String recipeStatus;
+        private Long recipeSeq;           // 레시피 시퀀스
+        private String recipeId;          // 레시피 ID
+        private String recipeTtl;         // 레시피 제목
+        private String dishNm;            // 음식 명
+        private String recipeCn;          // 레시피 내용
+        private Integer cookingTime;      // 조리 시간
+        private String recipeDifficultCd; // 레시피 난이도 코드
+        private String categoryCd;        // 카테고리 코드
+        private Integer viewCnt;          // 조회 수
+        private String writerName;        // 작성자 명
+        private LocalDateTime regDt;      // 등록 일시
+        private String recipeStatus;      // 레시피 상태
+        private String fileGrpId;         // 파일 그룹 ID
 
-        private List<String> mainImageUrls;
-        private List<IngredientDto> ingredients;
-        private List<StepDto> steps;
+        private List<String> mainImageUrls;   // 메인 이미지 URL
+        private List<Ingredient> ingredients; // 재료
+        private List<Step> steps;             // 단계
     }
 
-    // 재료 출력
     @Getter
+    @Setter
     @Builder
     @AllArgsConstructor
-    public static class IngredientDto {
-        private String ingrdNm;
-        private Float ingrdAmt;
-        private String ingrdUnt;
-
-        public static IngredientDto from(Ingredient entity) {
-            return IngredientDto.builder()
-                    .ingrdNm(entity.getIngrdNm())
-                    .ingrdAmt(entity.getIngrdAmt())
-                    .ingrdUnt(entity.getIngrdUnt())
-                    .build();
-        }
+    @NoArgsConstructor
+    public static class Ingredient {
+        private String ingrdNm;  // 재료 명
+        private Float ingrdAmt;  // 재료 양
+        private String ingrdUnt; // 재료 단위
     }
 
-    // 단계 출력
     @Getter
+    @Setter
     @Builder
     @AllArgsConstructor
-    public static class StepDto {
-        private Integer stepNo;
-        private String stepCn;
-        private List<String> stepImageUrls;
+    @NoArgsConstructor
+    public static class Step {
+        private Integer stepNo;   // 단계 번호
+        private String stepCn;    // 단계 내용
+        private String fileGrpId; // 파일 그룹 ID
+
+        private List<String> stepImageUrls; // 단계 이미지 URL
     }
 }

@@ -16,7 +16,7 @@ import java.util.Map;
 
 /**
  * @file        RecipeController.java
- * @description 레시피 컨트롤러
+ * @description 레시피 정보 컨트롤러
  * @author      강보람
  * @since       2026-01-25
  * @version     1.0
@@ -36,65 +36,15 @@ public class RecipeController {
     private final RecipeService recipeService;
 
     /**
-     * 레시피 등록
+     * 레시피 정보 등록
      * @param request 등록 요청 데이터
      * @param mainImage 메인 사진
      * @param multipartRequest 단계별 사진을 추출하기 위한 요청 객체
      * @param session 로그인 세션
      * @return 레시피 ID
      */
-    @PostMapping(value = "/save", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> save(
-            @RequestPart(value = "data") RecipeRequestDTO.Request request,
-            @RequestPart(value = "mainImage", required = false) List<MultipartFile> mainImage,
-            MultipartHttpServletRequest multipartRequest, // 단계별 사진을 추출하기 위한 요청 객체
-            HttpSession session
-    ) {
-        /*
-        TODO : 로그인 세션 적용 시 이용
-        SessionUser user = (SessionUser) session.getAttribute("USER_SESSION");
-        if (user == null) {
-            throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
-        }
-        String loginId = user.getLoginId();
-         */
-        String loginId = "testuser";
-
-        // 단계별 사진 추출
-        Map<Integer, List<MultipartFile>> stepImagesMap = recipeService.extractStepImages(request, multipartRequest);
-
-        return ResponseEntity.ok(recipeService.saveRecipe(loginId, request, mainImage, stepImagesMap));
-    }
-
-    /**
-     * 레시피 목록 조회
-     * @return 레시피 목록
-     */
-    @GetMapping("/list")
-    public ResponseEntity<List<RecipeResponseDTO.Summary>> findAll() {
-        return ResponseEntity.ok(recipeService.findAllRecipe());
-    }
-
-    /**
-     * 레시피 상세 조회
-     * @param recipeId 레시피 ID
-     * @return 레시피 상세 정보
-     */
-    @GetMapping("/detail/{recipeId}")
-    public ResponseEntity<RecipeResponseDTO.Detail> findDetail(@PathVariable String recipeId) {
-        return ResponseEntity.ok(recipeService.findRecipeDetail(recipeId));
-    }
-
-    /**
-     * 레시피 수정
-     * @param request 수정 요청 데이터
-     * @param mainImage 메인 사진
-     * @param multipartRequest 단계별 사진을 추출하기 위한 요청 객체
-     * @param session 로그인 세션
-     * @return 레시피 ID
-     */
-    @PutMapping(value = "/update", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<Long> update(
+    @PostMapping(value = "/insert", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> insertRecipeInfo(
             @RequestPart(value = "data") RecipeRequestDTO.Request request,
             @RequestPart(value = "mainImage", required = false) List<MultipartFile> mainImage,
             MultipartHttpServletRequest multipartRequest,
@@ -113,14 +63,43 @@ public class RecipeController {
         // 단계별 사진 추출
         Map<Integer, List<MultipartFile>> stepImagesMap = recipeService.extractStepImages(request, multipartRequest);
 
-        return ResponseEntity.ok(recipeService.updateRecipe(loginId, request, mainImage, stepImagesMap));
+        return ResponseEntity.ok(recipeService.insertRecipeInfo(loginId, request, mainImage, stepImagesMap));
     }
 
     /**
-     * 레시피 삭제
+     * 레시피 정보 목록 조회
+     * @return 레시피 목록
      */
-    @DeleteMapping("/delete/{recipeId}")
-    public ResponseEntity<Void> delete(@PathVariable String recipeId, HttpSession session) {
+    @GetMapping("/list")
+    public ResponseEntity<List<RecipeResponseDTO.Summary>> selectRecipeInfoList() {
+        return ResponseEntity.ok(recipeService.selectRecipeInfoList());
+    }
+
+    /**
+     * 레시피 정보 상세 조회
+     * @param recipeId 레시피 ID
+     * @return 레시피 상세 정보
+     */
+    @GetMapping("/detail/{recipeId}")
+    public ResponseEntity<RecipeResponseDTO.Detail> retrieveRecipeInfo(@PathVariable String recipeId) {
+        return ResponseEntity.ok(recipeService.retrieveRecipeInfo(recipeId));
+    }
+
+    /**
+     * 레시피 정보 수정
+     * @param request 수정 요청 데이터
+     * @param mainImage 메인 사진
+     * @param multipartRequest 단계별 사진을 추출하기 위한 요청 객체
+     * @param session 로그인 세션
+     * @return 레시피 ID
+     */
+    @PutMapping(value = "/update", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    public ResponseEntity<Long> updateRecipeInfo(
+            @RequestPart(value = "data") RecipeRequestDTO.Request request,
+            @RequestPart(value = "mainImage", required = false) List<MultipartFile> mainImage,
+            MultipartHttpServletRequest multipartRequest,
+            HttpSession session
+    ) {
         /*
         TODO : 로그인 세션 적용 시 이용
         SessionUser user = (SessionUser) session.getAttribute("USER_SESSION");
@@ -131,7 +110,31 @@ public class RecipeController {
          */
         String loginId = "testuser";
 
-        recipeService.deleteRecipe(recipeId, loginId);
+        // 단계별 사진 추출
+        Map<Integer, List<MultipartFile>> stepImagesMap = recipeService.extractStepImages(request, multipartRequest);
+
+        return ResponseEntity.ok(recipeService.updateRecipeInfo(loginId, request, mainImage, stepImagesMap));
+    }
+
+    /**
+     * 레시피 정보 삭제
+     * @param recipeId 레시피 ID
+     * @param session 로그인 세션
+     * @return
+     */
+    @DeleteMapping("/delete/{recipeId}")
+    public ResponseEntity<Void> deleteRecipeInfo(@PathVariable String recipeId, HttpSession session) {
+        /*
+        TODO : 로그인 세션 적용 시 이용
+        SessionUser user = (SessionUser) session.getAttribute("USER_SESSION");
+        if (user == null) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
+        }
+        String loginId = user.getLoginId();
+         */
+        String loginId = "testuser";
+
+        recipeService.deleteRecipeInfo(recipeId, loginId);
         return ResponseEntity.ok().build();
     }
 }
