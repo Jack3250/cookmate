@@ -60,6 +60,7 @@ bin/
 
 # 예외 파일
 .env
+document
 
 ### 보안 파일 제외 ###
 src/main/resources/application.properties
