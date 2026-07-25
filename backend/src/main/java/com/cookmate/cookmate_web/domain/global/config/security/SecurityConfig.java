@@ -42,6 +42,7 @@ public class SecurityConfig {
                         , "/users/*"
                         , "/files/**"
                         , "/recipe/**"
+                        , "/menu/**"
                     ).permitAll() // 허용 페이지
                 .anyRequest().authenticated() // 그 외는 인증 필요
             );
