@@ -45,7 +45,7 @@ public class RecipeController {
      */
     @PostMapping(value = "/insert", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> insertRecipeInfo(
-            @RequestPart(value = "data") RecipeRequestDTO.Request request,
+            @RequestPart(value = "data") RecipeRequestDTO.Recipe request,
             @RequestPart(value = "mainImage", required = false) List<MultipartFile> mainImage,
             MultipartHttpServletRequest multipartRequest,
             HttpSession session
@@ -68,11 +68,12 @@ public class RecipeController {
 
     /**
      * 레시피 정보 목록 조회
+     * @param request 카테고리 코드
      * @return 레시피 목록
      */
     @GetMapping("/list")
-    public ResponseEntity<List<RecipeResponseDTO.Summary>> selectRecipeInfoList() {
-        return ResponseEntity.ok(recipeService.selectRecipeInfoList());
+    public ResponseEntity<List<RecipeResponseDTO.Summary>> selectRecipeInfoList(@ModelAttribute RecipeRequestDTO.Search request) {
+        return ResponseEntity.ok(recipeService.selectRecipeInfoList(request));
     }
 
     /**
@@ -95,7 +96,7 @@ public class RecipeController {
      */
     @PutMapping(value = "/update", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<Long> updateRecipeInfo(
-            @RequestPart(value = "data") RecipeRequestDTO.Request request,
+            @RequestPart(value = "data") RecipeRequestDTO.Recipe request,
             @RequestPart(value = "mainImage", required = false) List<MultipartFile> mainImage,
             MultipartHttpServletRequest multipartRequest,
             HttpSession session

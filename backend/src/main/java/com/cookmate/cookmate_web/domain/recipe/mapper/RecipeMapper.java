@@ -24,10 +24,10 @@ public interface RecipeMapper {
 
     /**
      * 레시피 정보 등록
-     * @param request 레시피 등록 정보
+     * @param recipe 레시피 등록 정보
      * @return 생성된 레시피 시퀀스
      */
-    int insertRecipeInfo(RecipeRequestDTO.Request request);
+    int insertRecipeInfo(RecipeRequestDTO.Recipe recipe);
 
     /**
      * 레시피 재료 정보 등록
@@ -43,9 +43,10 @@ public interface RecipeMapper {
 
     /**
      * 레시피 정보 목록 조회
+     * @param recipe 카테고리 코드
      * @return 레시피 목록
      */
-    List<RecipeResponseDTO.Summary> selectRecipeInfoList();
+    List<RecipeResponseDTO.Summary> selectRecipeInfoList(RecipeRequestDTO.Search recipe);
 
     /**
      * 레시피 정보 상세 조회
@@ -70,9 +71,9 @@ public interface RecipeMapper {
 
     /**
      * 레시피 정보 수정
-     * @param request 수정할 레시피 정보
+     * @param recipe 수정할 레시피 정보
      */
-    void updateRecipeInfo(RecipeRequestDTO.Request request);
+    void updateRecipeInfo(RecipeRequestDTO.Recipe recipe);
 
     /**
      * 레시피 재료 정보 삭제

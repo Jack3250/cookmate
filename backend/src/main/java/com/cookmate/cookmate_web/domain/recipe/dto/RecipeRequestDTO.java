@@ -24,9 +24,15 @@ public class RecipeRequestDTO {
 
     @Getter
     @Setter
+    public static class Search {
+        private String categoryCd; // 카테고리 코드
+    }
+
+    @Getter
+    @Setter
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class Request {
+    public static class Recipe {
         private Long recipeSeq;            // 레시피 시퀀스
         private String recipeId;           // 레시피 ID
         private String recipeTtl;          // 레시피 제목

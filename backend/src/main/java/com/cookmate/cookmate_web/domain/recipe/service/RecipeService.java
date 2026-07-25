@@ -42,14 +42,14 @@ public class RecipeService {
      * 레시피 정보 등록
      *
      * @param loginId       로그인 ID
-     * @param request       저장 요청 데이터
+     * @param recipe       저장 요청 데이터
      * @param mainImage     메인 사진
      * @param stepImagesMap 단계별 사진 목록
      * @return 레시피 ID
      */
     @Transactional
     public String insertRecipeInfo(String loginId,
-                                   RecipeRequestDTO.Request request,
+                                   RecipeRequestDTO.Recipe recipe,
                                    List<MultipartFile> mainImage,
                                    Map<Integer, List<MultipartFile>> stepImagesMap) {
         String rgtrKey = "testuserkey";
@@ -61,17 +61,17 @@ public class RecipeService {
         }
 
         String recipeId = KeygenUtil.generateKey();
-        request.setRecipeId(recipeId);
-        request.setFileGrpId(mainFileGrpId);
-        request.setRgtrKey(rgtrKey);
+        recipe.setRecipeId(recipeId);
+        recipe.setFileGrpId(mainFileGrpId);
+        recipe.setRgtrKey(rgtrKey);
 
         // 레시피 정보 등록
-        recipeMapper.insertRecipeInfo(request);
-        Long recipeSeq = request.getRecipeSeq();
+        recipeMapper.insertRecipeInfo(recipe);
+        Long recipeSeq = recipe.getRecipeSeq();
 
         // 레시피 재료, 단계 정보 등록
-        insertRecipeIngredient(request, recipeSeq);
-        insertRecipeSteps(request, stepImagesMap, rgtrKey, recipeSeq);
+        insertRecipeIngredient(recipe, recipeSeq);
+        insertRecipeSteps(recipe, stepImagesMap, rgtrKey, recipeSeq);
 
         return recipeId;
     }
@@ -79,12 +79,13 @@ public class RecipeService {
     /**
      * 레시피 정보 목록 조회
      *
+     * @param request 카테고리 코드
      * @return 레시피 목록
      */
     @Transactional(readOnly = true)
-    public List<RecipeResponseDTO.Summary> selectRecipeInfoList() {
+    public List<RecipeResponseDTO.Summary> selectRecipeInfoList(RecipeRequestDTO.Search request) {
         // 레시피 목록 조회
-        List<RecipeResponseDTO.Summary> recipeList = recipeMapper.selectRecipeInfoList();
+        List<RecipeResponseDTO.Summary> recipeList = recipeMapper.selectRecipeInfoList(request);
 
         if (!recipeList.isEmpty()) {
             for (RecipeResponseDTO.Summary recipe : recipeList) {
@@ -146,7 +147,7 @@ public class RecipeService {
      */
     @Transactional
     public Long updateRecipeInfo(String loginId,
-                                 RecipeRequestDTO.Request request,
+                                 RecipeRequestDTO.Recipe request,
                                  List<MultipartFile> mainImages,
                                  Map<Integer, List<MultipartFile>> stepImagesMap) {
         // 레시피 정보 상세 조회
@@ -212,12 +213,12 @@ public class RecipeService {
     /**
      * 레시피 재료 정보 등록
      *
-     * @param request   저장 요청 데이터
+     * @param recipe   저장 요청 데이터
      * @param recipeSeq 레시피 시퀀스
      */
-    private void insertRecipeIngredient(RecipeRequestDTO.Request request, Long recipeSeq) {
-        if (request.getIngredients() != null) {
-            for (RecipeRequestDTO.Ingredient ingredient : request.getIngredients()) {
+    private void insertRecipeIngredient(RecipeRequestDTO.Recipe recipe, Long recipeSeq) {
+        if (recipe.getIngredients() != null) {
+            for (RecipeRequestDTO.Ingredient ingredient : recipe.getIngredients()) {
                 ingredient.setRecipeSeq(recipeSeq);
                 recipeMapper.insertRecipeIngredient(ingredient);
             }
@@ -227,14 +228,14 @@ public class RecipeService {
     /**
      * 레시피 단계 정보 등록
      *
-     * @param request       저장 요청 데이터
+     * @param recipe       저장 요청 데이터
      * @param stepImagesMap 단계별 사진 목록
      * @param userKey       등록자 키
      * @param recipeSeq     레시피 시퀀스
      */
-    private void insertRecipeSteps(RecipeRequestDTO.Request request, Map<Integer, List<MultipartFile>> stepImagesMap, String userKey, Long recipeSeq) {
-        if (request.getSteps() != null) {
-            List<RecipeRequestDTO.Step> steps = request.getSteps();
+    private void insertRecipeSteps(RecipeRequestDTO.Recipe recipe, Map<Integer, List<MultipartFile>> stepImagesMap, String userKey, Long recipeSeq) {
+        if (recipe.getSteps() != null) {
+            List<RecipeRequestDTO.Step> steps = recipe.getSteps();
 
             for (int i = 0; i < steps.size(); i++) {
                 RecipeRequestDTO.Step step = steps.get(i);
@@ -262,16 +263,16 @@ public class RecipeService {
     /**
      * 단계별 사진 추출
      *
-     * @param request          저장 요청 데이터
+     * @param recipe          저장 요청 데이터
      * @param multipartRequest 단계별 사진을 추출하기 위한 요청 객체
      * @return 단계별 사진 목록
      */
-    public Map<Integer, List<MultipartFile>> extractStepImages(RecipeRequestDTO.Request request,
+    public Map<Integer, List<MultipartFile>> extractStepImages(RecipeRequestDTO.Recipe recipe,
                                                                MultipartHttpServletRequest multipartRequest) {
         Map<Integer, List<MultipartFile>> stepImagesMap = new HashMap<>();
 
-        if (request.getSteps() != null) {
-            for (int i = 0; i < request.getSteps().size(); i++) {
+        if (recipe.getSteps() != null) {
+            for (int i = 0; i < recipe.getSteps().size(); i++) {
                 String key = "stepImages_" + i;
                 List<MultipartFile> files = multipartRequest.getFiles(key);
                 if (!files.isEmpty()) {
