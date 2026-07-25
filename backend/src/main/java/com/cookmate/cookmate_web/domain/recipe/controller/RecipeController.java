@@ -36,6 +36,16 @@ public class RecipeController {
     private final RecipeService recipeService;
 
     /**
+     * 레시피 정보 목록 페이징 및 조건 조회
+     * @param request 검색 및 페이징 파라미터 DTO
+     * @return 레시피 목록 및 페이징 응답 DTO
+     */
+    @GetMapping("/list")
+    public ResponseEntity<RecipeResponseDTO.ListInfo> selectRecipeInfoList(@ModelAttribute RecipeRequestDTO.Search request) {
+        return ResponseEntity.ok(recipeService.selectRecipeInfoList(request));
+    }
+
+    /**
      * 레시피 정보 등록
      * @param request 등록 요청 데이터
      * @param mainImage 메인 사진
@@ -64,16 +74,6 @@ public class RecipeController {
         Map<Integer, List<MultipartFile>> stepImagesMap = recipeService.extractStepImages(request, multipartRequest);
 
         return ResponseEntity.ok(recipeService.insertRecipeInfo(loginId, request, mainImage, stepImagesMap));
-    }
-
-    /**
-     * 레시피 정보 목록 조회
-     * @param request 카테고리 코드
-     * @return 레시피 목록
-     */
-    @GetMapping("/list")
-    public ResponseEntity<List<RecipeResponseDTO.Summary>> selectRecipeInfoList(@ModelAttribute RecipeRequestDTO.Search request) {
-        return ResponseEntity.ok(recipeService.selectRecipeInfoList(request));
     }
 
     /**

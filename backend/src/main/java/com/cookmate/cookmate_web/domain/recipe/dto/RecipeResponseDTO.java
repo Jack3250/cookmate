@@ -13,16 +13,31 @@ public class RecipeResponseDTO {
     @AllArgsConstructor
     @NoArgsConstructor
     public static class Summary {
+        private int totalCount;           // 총 데이터 건수
         private String recipeId;          // 레시피 ID
         private String recipeTtl;         // 레시피 제목
         private String dishNm;            // 음식 명
         private String writerName;        // 작성자 명
         private Integer viewCnt;          // 조회 수
+        private Integer likeCnt;          // 좋아요 수
         private String categoryCd;        // 카테고리 코드
         private String recipeDifficultCd; // 레시피 난이도 코드
         private LocalDateTime regDt;      // 등록 일시
         private String mainImageUrl;      // 메인 이미지 URL
         private String fileGrpId;         // 파일 그룹 ID
+    }
+
+    @Getter
+    @Setter
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class ListInfo {
+        private int totalCount;     // 전체 데이터 개수
+        private int totalPageCount; // 전체 페이지 개수
+        private int page;           // 현재 페이지 번호
+        private int pageSize;       // 페이지당 출력 개수
+        private List<Summary> list; // 목록 데이터
     }
 
     @Getter

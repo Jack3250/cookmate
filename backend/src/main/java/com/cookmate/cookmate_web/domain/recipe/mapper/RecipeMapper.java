@@ -23,6 +23,13 @@ import java.util.List;
 public interface RecipeMapper {
 
     /**
+     * 레시피 정보 목록 페이징 및 조건 조회
+     * @param request 검색 및 페이징 조건 DTO
+     * @return 레시피 페이징 목록
+     */
+    List<RecipeResponseDTO.Summary> selectRecipeInfoList(RecipeRequestDTO.Search request);
+
+    /**
      * 레시피 정보 등록
      * @param recipe 레시피 등록 정보
      * @return 생성된 레시피 시퀀스
@@ -40,13 +47,6 @@ public interface RecipeMapper {
      * @param step 단계 정보
      */
     void insertRecipeStep(RecipeRequestDTO.Step step);
-
-    /**
-     * 레시피 정보 목록 조회
-     * @param recipe 카테고리 코드
-     * @return 레시피 목록
-     */
-    List<RecipeResponseDTO.Summary> selectRecipeInfoList(RecipeRequestDTO.Search recipe);
 
     /**
      * 레시피 정보 상세 조회

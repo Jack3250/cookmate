@@ -34,25 +34,59 @@
     <select id="selectRecipeInfoList"
             parameterType="com.cookmate.cookmate_web.domain.recipe.dto.RecipeRequestDTO$Search"
             resultType="com.cookmate.cookmate_web.domain.recipe.dto.RecipeResponseDTO$Summary">
-        /* RecipeMapper.selectRecipeInfoList : 레시피 정보 목록 조회 */
-        SELECT R.RECIPE_ID
+        /* RecipeMapper.selectRecipeInfoList : 레시피 정보 목록 페이징 및 조건 조회 */
+        <include refid="pagination.start" />
+        SELECT R.RECIPE_SEQ
+             , R.RECIPE_ID
              , R.RECIPE_TTL
              , R.DISH_NM
-             , R.FILE_GRP_ID
-             , U.USER_NM AS WRITER_NAME
-             , R.VIEW_CNT
-             , R.CATEGORY_CD
+             , R.RECIPE_CN
+             , R.COOKING_TIME
              , R.RECIPE_DIFFICULT_CD
+             , R.CATEGORY_CD
+             , R.VIEW_CNT
+             , (SELECT COUNT(*) FROM LIKES L WHERE L.TGT_SEQ = R.RECIPE_SEQ) AS LIKE_CNT
+             , U.USER_NM AS WRITER_NAME
+             , R.FILE_GRP_ID
              , R.REG_DT
         FROM RECIPE R
         INNER JOIN USERS U
-            ON R.RGTR_KEY = U.USER_KEY
-            AND U.DEL_YN = 'N'
+           ON R.RGTR_KEY = U.USER_KEY
+          AND U.DEL_YN = 'N'
         WHERE R.DEL_YN = 'N'
         <if test="categoryCd != null and categoryCd != ''">
-            AND R.CATEGORY_CD = #{categoryCd}
+          AND R.CATEGORY_CD = #{categoryCd}
+        </if>
+        <if test="recipeDifficultCd != null and recipeDifficultCd != ''">
+          AND R.RECIPE_DIFFICULT_CD = #{recipeDifficultCd}
+        </if>
+        <if test="searchKeyword != null and searchKeyword != ''">
+          AND (
+              R.RECIPE_TTL LIKE CONCAT('%', #{searchKeyword}, '%')
+              OR R.DISH_NM LIKE CONCAT('%', #{searchKeyword}, '%')
+          )
+        </if>
+        <if test="minViews != null and minViews > 0">
+          AND R.VIEW_CNT >= #{minViews}
+        </if>
+        <if test="minLikes != null and minLikes > 0">
+          AND (SELECT COUNT(*) FROM LIKES L WHERE L.TGT_SEQ = R.RECIPE_SEQ) >= #{minLikes}
+        </if>
+        <if test="dateRange != null and dateRange != ''">
+          <choose>
+            <when test='dateRange == "1D"'>
+              AND R.REG_DT >= CURRENT_TIMESTAMP - INTERVAL '1 DAY'
+            </when>
+            <when test='dateRange == "1W"'>
+              AND R.REG_DT >= CURRENT_TIMESTAMP - INTERVAL '1 WEEK'
+            </when>
+            <when test='dateRange == "1M"'>
+              AND R.REG_DT >= CURRENT_TIMESTAMP - INTERVAL '1 MONTH'
+            </when>
+          </choose>
         </if>
         ORDER BY R.REG_DT DESC
+        <include refid="pagination.end" />
     </select>
 
     <select id="retrieveRecipeInfo" parameterType="string" resultType="com.cookmate.cookmate_web.domain.recipe.dto.RecipeResponseDTO$Detail">
@@ -131,9 +165,9 @@
     <update id="deleteRecipeInfo" parameterType="string">
         /* RecipeMapper.deleteRecipeInfo : 레시피 정보 삭제 */
         UPDATE RECIPE
-        SET DEL_YN   = 'Y',
-            MDFCN_DT = CURRENT_TIMESTAMP
-        WHERE RECIPE_ID = #{recipeId}
+           SET DEL_YN   = 'Y'
+             , MDFCN_DT = CURRENT_TIMESTAMP
+         WHERE RECIPE_ID = #{recipeId}
     </update>
 
 </mapper>

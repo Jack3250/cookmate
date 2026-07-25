@@ -39,6 +39,46 @@ public class RecipeService {
     private final FileService fileService;
 
     /**
+     * 레시피 정보 목록 페이징 및 조건 조회
+     *
+     * @param request 검색 및 페이징 조건 DTO
+     * @return 레시피 목록 및 페이징 정보 응답 DTO
+     */
+    @Transactional(readOnly = true)
+    public RecipeResponseDTO.ListInfo selectRecipeInfoList(RecipeRequestDTO.Search request) {
+        // 1개 통합 쿼리로 레시피 목록 페이징 및 totalCount 조회
+        List<RecipeResponseDTO.Summary> recipeList = recipeMapper.selectRecipeInfoList(request);
+
+        int totalCount = 0;
+        int totalPageCount = 0;
+
+        if (recipeList != null && !recipeList.isEmpty()) {
+            for (RecipeResponseDTO.Summary recipe : recipeList) {
+                // 메인 이미지 url 조회
+                List<String> urls = fileService.getFileUrls(recipe.getFileGrpId());
+
+                String mainImageUrl = null;
+                if (!urls.isEmpty()) {
+                    mainImageUrl = urls.get(0);
+                }
+                recipe.setMainImageUrl(mainImageUrl);
+            }
+            totalCount = recipeList.get(0).getTotalCount();
+            totalPageCount = (int) Math.ceil((double) totalCount / request.getPageSize());
+        } else {
+            recipeList = java.util.List.of();
+        }
+
+        return RecipeResponseDTO.ListInfo.builder()
+                .totalCount(totalCount)
+                .totalPageCount(totalPageCount)
+                .page(request.getPage())
+                .pageSize(request.getPageSize())
+                .list(recipeList)
+                .build();
+    }
+
+    /**
      * 레시피 정보 등록
      *
      * @param loginId       로그인 ID
@@ -74,33 +114,6 @@ public class RecipeService {
         insertRecipeSteps(recipe, stepImagesMap, rgtrKey, recipeSeq);
 
         return recipeId;
-    }
-
-    /**
-     * 레시피 정보 목록 조회
-     *
-     * @param request 카테고리 코드
-     * @return 레시피 목록
-     */
-    @Transactional(readOnly = true)
-    public List<RecipeResponseDTO.Summary> selectRecipeInfoList(RecipeRequestDTO.Search request) {
-        // 레시피 목록 조회
-        List<RecipeResponseDTO.Summary> recipeList = recipeMapper.selectRecipeInfoList(request);
-
-        if (!recipeList.isEmpty()) {
-            for (RecipeResponseDTO.Summary recipe : recipeList) {
-                // 메인 이미지 url 조회
-                List<String> urls = fileService.getFileUrls(recipe.getFileGrpId());
-
-                String mainImageUrl = null;
-                if (!urls.isEmpty()) {
-                    mainImageUrl = urls.get(0);
-                }
-                recipe.setMainImageUrl(mainImageUrl);
-            }
-        }
-
-        return recipeList;
     }
 
     /**

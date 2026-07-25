@@ -1,5 +1,6 @@
 package com.cookmate.cookmate_web.domain.recipe.dto;
 
+import com.cookmate.cookmate_web.domain.common.dto.PageInfoDTO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,8 +25,13 @@ public class RecipeRequestDTO {
 
     @Getter
     @Setter
-    public static class Search {
-        private String categoryCd; // 카테고리 코드
+    public static class Search extends PageInfoDTO {
+        private String categoryCd;        // 카테고리 코드
+        private String recipeDifficultCd; // 레시피 난이도 코드
+        private String searchKeyword;     // 검색어
+        private String dateRange;         // 작성일 기간 (1D, 1W, 1M, 전체: 빈 값 '')
+        private Integer minViews;         // 최소 조회 수
+        private Integer minLikes;         // 최소 좋아요 수
     }
 
     @Getter
