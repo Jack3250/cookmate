@@ -43,7 +43,7 @@ function AppRouter() {
 
         {/* 레시피 */}
         <Route path="/recipes">
-          <Route path="list/:categoryCode" element={<RecipeListPage />} /> {/* 리스트 */}
+          <Route path="list" element={<RecipeListPage />} /> {/* 리스트 */}
           <Route path="write" element={<RecipeFormPage />} /> {/* 등록 */}
           <Route path="edit/:recipeId" element={<RecipeFormPage />} /> {/* 수정 */}
           <Route path="detail/:recipeId" element={<RecipeDetailPage />} /> {/* 상세 */}
