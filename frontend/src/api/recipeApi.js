@@ -47,3 +47,12 @@ export const updateRecipeInfo = async (formData) => {
   });
   return response.data;
 };
+
+/**
+ * 레시피 정보 삭제
+ * @param {String} recipeId 레시피 ID
+ * @returns {Promise<void>} 
+ */
+export const deleteRecipeInfo = async (recipeId) => {
+  await client.delete(`/recipe/delete/${recipeId}`);
+};
