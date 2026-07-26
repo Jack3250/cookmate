@@ -5,6 +5,19 @@ import lombok.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * @file        RecipeResponseDTO.java
+ * @description 레시피 응답 DTO
+ * @author      강보람
+ * @since       2026-01-26
+ * @version     1.0
+ *
+ * <pre>
+ * 수정일           수정자          수정내용
+ * -------------------------------------------------------
+ * 2026-01-26      강보람          최초 생성
+ * </pre>
+ */
 public class RecipeResponseDTO {
 
     @Getter
@@ -55,6 +68,8 @@ public class RecipeResponseDTO {
         private String recipeDifficultCd; // 레시피 난이도 코드
         private String categoryCd;        // 카테고리 코드
         private Integer viewCnt;          // 조회 수
+        private Integer likeCnt;          // 좋아요 수
+        private Boolean isLiked;          // 좋아요 여부
         private String writerName;        // 작성자 명
         private LocalDateTime regDt;      // 등록 일시
         private String recipeStatus;      // 레시피 상태

@@ -80,6 +80,7 @@
              , R.RECIPE_DIFFICULT_CD
              , R.CATEGORY_CD
              , R.VIEW_CNT
+             , (SELECT COUNT(*) FROM LIKES L WHERE L.TGT_SEQ = R.RECIPE_SEQ AND L.TGT_TY = 'RECIPE' AND L.DEL_YN = 'N') AS LIKE_CNT
              , U.USER_NM AS WRITER_NAME
              , R.REG_DT
              , R.RECIPE_STATUS
@@ -213,7 +214,7 @@
           AND H.DEL_YN = 'N'
     </select>
 
-    <insert id="insertRecipeHashtag">
+    <insert id="insertRecipeHashtag" parameterType="map">
         /* RecipeMapper.insertRecipeHashtag : 레시피 해시태그 매핑 등록 */
         INSERT INTO RECIPE_HASHTAG (RECIPE_SEQ, HSTG_SEQ)
         VALUES (#{recipeSeq}, #{hstgSeq})
@@ -227,5 +228,42 @@
         SET DEL_YN = 'Y'
         WHERE RECIPE_SEQ = #{recipeSeq}
     </delete>
+
+    <!--
+    ======================
+    좋아요 관련
+    ======================
+    -->
+    <select id="checkUserLike"
+            parameterType="com.cookmate.cookmate_web.domain.common.dto.LikeDTO$Request"
+            resultType="com.cookmate.cookmate_web.domain.common.dto.LikeDTO$Response">
+        /* RecipeMapper.checkUserLike : 사용자 좋아요 여부 확인 (0: 안 누름, 1: 누름(del_yn=N), -1: 취소됨(del_yn=Y)) */
+        SELECT CASE 
+                 WHEN DEL_YN = 'N' THEN 1 
+                 ELSE -1 
+               END AS LIKE_STATUS
+        FROM LIKES
+        WHERE TGT_SEQ = #{tgtSeq}
+          AND USER_SEQ = (SELECT USER_SEQ FROM USERS WHERE LOGIN_ID = #{loginId} AND DEL_YN = 'N')
+          AND TGT_TY = #{tgtTy}
+    </select>
+
+    <select id="upsertLike"
+            parameterType="com.cookmate.cookmate_web.domain.common.dto.LikeDTO$Request"
+            resultType="com.cookmate.cookmate_web.domain.common.dto.LikeDTO$Response">
+        /* RecipeMapper.upsertLike : 좋아요 등록/수정 (UPSERT) */
+        INSERT INTO LIKES (TGT_SEQ, USER_SEQ, TGT_TY, CRET_DT, DEL_YN)
+        VALUES ( #{tgtSeq}
+               , (SELECT USER_SEQ FROM USERS WHERE LOGIN_ID = #{loginId} AND DEL_YN = 'N')
+               , #{tgtTy}
+               , CURRENT_TIMESTAMP
+               , 'N')
+        ON CONFLICT (TGT_SEQ, USER_SEQ, TGT_TY)
+            DO UPDATE SET DEL_YN = CASE WHEN LIKES.DEL_YN = 'N' THEN 'Y' ELSE 'N' END
+        RETURNING CASE
+                      WHEN LIKES.DEL_YN = 'N' THEN 1
+                      ELSE -1
+            END AS LIKE_STATUS
+    </select>
 
 </mapper>

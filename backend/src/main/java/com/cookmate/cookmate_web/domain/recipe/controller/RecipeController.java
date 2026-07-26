@@ -3,6 +3,7 @@ package com.cookmate.cookmate_web.domain.recipe.controller;
 import com.cookmate.cookmate_web.domain.recipe.dto.RecipeRequestDTO;
 import com.cookmate.cookmate_web.domain.recipe.dto.RecipeResponseDTO;
 import com.cookmate.cookmate_web.domain.recipe.service.RecipeService;
+import com.cookmate.cookmate_web.domain.users.dto.SessionUser;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -82,8 +83,10 @@ public class RecipeController {
      * @return 레시피 상세 정보
      */
     @GetMapping("/detail/{recipeId}")
-    public ResponseEntity<RecipeResponseDTO.Detail> retrieveRecipeInfo(@PathVariable String recipeId) {
-        return ResponseEntity.ok(recipeService.retrieveRecipeInfo(recipeId));
+    public ResponseEntity<RecipeResponseDTO.Detail> retrieveRecipeInfo(@PathVariable String recipeId, HttpSession session) {
+        SessionUser user = (SessionUser) session.getAttribute("loginUser");
+        String loginId = (user != null) ? user.getLoginId() : null;
+        return ResponseEntity.ok(recipeService.retrieveRecipeInfo(recipeId, loginId));
     }
 
     /**
@@ -137,5 +140,26 @@ public class RecipeController {
 
         recipeService.deleteRecipeInfo(recipeId, loginId);
         return ResponseEntity.ok().build();
+    }
+
+    /**
+     * 레시피 좋아요 토글
+     * @param recipeId 레시피 ID
+     * @param session 로그인 세션
+     * @return 현재 좋아요 상태 (true: 좋아요, false: 취소)
+     */
+    @PostMapping("/{recipeId}/like")
+    public ResponseEntity<Boolean> toggleRecipeLike(@PathVariable String recipeId, HttpSession session) {
+        /*
+        TODO : 로그인 세션 적용 시 이용
+        SessionUser user = (SessionUser) session.getAttribute("USER_SESSION");
+        if (user == null) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
+        }
+        String loginId = user.getLoginId();
+         */
+        String loginId = "testuser";
+
+        return ResponseEntity.ok(recipeService.toggleRecipeLike(recipeId, loginId));
     }
 }

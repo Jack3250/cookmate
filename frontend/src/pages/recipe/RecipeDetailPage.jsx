@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import RecipeHeader from '../../components/recipe/RecipeHeader';
 import IngredientList from '../../components/recipe/IngredientList';
 import StepList from '../../components/recipe/StepList';
+import LikeButton from '../../components/common/LikeButton';
 
 /**
  * 레시피 상세 조회 페이지 컴포넌트
@@ -64,6 +65,34 @@ function RecipeDetailPage() {
       } catch (error) {
         console.error('레시피 삭제 실패:', error);
         toast.error('레시피 삭제에 실패했습니다.');
+      }
+    }
+  };
+
+  /**
+   * 좋아요 버튼 클릭 핸들러
+   */
+  const handleLikeClick = async () => {
+    try {
+      // API 호출하여 좋아요 토글
+      const newLikeStatus = await toggleRecipeLike(recipeId);
+
+      // 화면 내 상태 즉시 업데이트 (Optimistic UI 업데이트)
+      setRecipe(prev => ({
+        ...prev,
+        isLiked: newLikeStatus,
+        likeCnt: prev.likeCnt + (newLikeStatus ? 1 : -1)
+      }));
+
+      if (newLikeStatus) {
+        toast.success('이 레시피를 좋아합니다!');
+      }
+    } catch (error) {
+      if (error.response && error.response.status === 401) {
+        toast.error('로그인이 필요한 기능입니다.');
+      } else {
+        toast.error('좋아요 처리 중 오류가 발생했습니다.');
+        console.error('좋아요 에러:', error);
       }
     }
   };
@@ -148,6 +177,16 @@ function RecipeDetailPage() {
           ))}
         </div>
       )}
+
+      {/* 좋아요 및 소셜 액션 버튼 영역 */}
+      <div className="flex justify-center items-center mt-12 mb-4 border-t border-gray-200 dark:border-zinc-700 pt-10">
+        <LikeButton 
+          isLiked={recipe.isLiked} 
+          likeCnt={recipe.likeCnt} 
+          onClick={handleLikeClick} 
+          size="lg" 
+        />
+      </div>
 
     </div>
   );

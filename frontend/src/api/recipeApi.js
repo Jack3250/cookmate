@@ -56,3 +56,13 @@ export const updateRecipeInfo = async (formData) => {
 export const deleteRecipeInfo = async (recipeId) => {
   await client.delete(`/recipe/delete/${recipeId}`);
 };
+
+/**
+ * 레시피 좋아요 토글
+ * @param {String} recipeId 레시피 ID
+ * @returns {Promise<boolean>} 좋아요 상태
+ */
+export const toggleRecipeLike = async (recipeId) => {
+  const response = await client.post(`/recipe/${recipeId}/like`);
+  return response.data;
+};

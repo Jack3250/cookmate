@@ -4,6 +4,7 @@ import com.cookmate.cookmate_web.domain.common.util.KeygenUtil;
 import com.cookmate.cookmate_web.domain.file.service.FileService;
 import com.cookmate.cookmate_web.domain.global.error.CustomException;
 import com.cookmate.cookmate_web.domain.global.error.ErrorCode;
+import com.cookmate.cookmate_web.domain.common.dto.LikeDTO;
 import com.cookmate.cookmate_web.domain.recipe.dto.RecipeRequestDTO;
 import com.cookmate.cookmate_web.domain.recipe.dto.RecipeResponseDTO;
 import com.cookmate.cookmate_web.domain.recipe.mapper.RecipeMapper;
@@ -85,10 +86,11 @@ public class RecipeService {
     /**
      * 레시피 정보 상세 조회
      * @param recipeId 레시피 ID
+     * @param loginId 유저 아이디
      * @return 레시피 상세 정보
      */
     @Transactional(readOnly = true)
-    public RecipeResponseDTO.Detail retrieveRecipeInfo(String recipeId) {
+    public RecipeResponseDTO.Detail retrieveRecipeInfo(String recipeId, String loginId) {
         // 레시피 정보 상세 조회
         RecipeResponseDTO.Detail recipe = recipeMapper.retrieveRecipeInfo(recipeId);
         if (recipe == null) {
@@ -114,6 +116,20 @@ public class RecipeService {
         // 레시피 해시태그 목록 조회
         List<String> hashtags = recipeMapper.selectRecipeHashtags(recipe.getRecipeSeq());
         recipe.setHashtags(hashtags);
+
+        // 사용자 좋아요 여부 체크
+        if (loginId != null) {
+            LikeDTO.Request likeRequest = LikeDTO.Request.builder()
+                    .tgtSeq(recipe.getRecipeSeq())
+                    .tgtTy("RECIPE")
+                    .loginId(loginId)
+                    .build();
+            LikeDTO.Response likeResponse = recipeMapper.checkUserLike(likeRequest);
+            Integer likeStatus = (likeResponse != null) ? likeResponse.getLikeStatus() : 0;
+            recipe.setIsLiked(likeStatus != null && likeStatus == 1);
+        } else {
+            recipe.setIsLiked(false);
+        }
 
         return recipe;
     }
@@ -221,6 +237,34 @@ public class RecipeService {
 
         // 레시피 정보 삭제
         recipeMapper.deleteRecipeInfo(recipeId);
+    }
+
+    /*
+    ========================================================
+    좋아요
+    ========================================================
+     */
+    /**
+     * 레시피 좋아요 토글
+     * @param recipeId 레시피 ID
+     * @param loginId 유저 아이디
+     * @return 현재 좋아요 상태 (true: 좋아요 상태, false: 취소 상태)
+     */
+    @Transactional
+    public boolean toggleRecipeLike(String recipeId, String loginId) {
+        RecipeResponseDTO.Detail recipe = recipeMapper.retrieveRecipeInfo(recipeId);
+        if (recipe == null) {
+            throw new CustomException(ErrorCode.RECIPE_NOT_FOUND);
+        }
+
+        LikeDTO.Request likeRequest = LikeDTO.Request.builder()
+                .tgtSeq(recipe.getRecipeSeq())
+                .tgtTy("RECIPE")
+                .loginId(loginId)
+                .build();
+
+        LikeDTO.Response response = recipeMapper.upsertLike(likeRequest);
+        return response != null && response.getLikeStatus() == 1;
     }
 
     /*

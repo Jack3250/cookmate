@@ -1,5 +1,6 @@
 package com.cookmate.cookmate_web.domain.recipe.mapper;
 
+import com.cookmate.cookmate_web.domain.common.dto.LikeDTO;
 import com.cookmate.cookmate_web.domain.recipe.dto.RecipeRequestDTO;
 import com.cookmate.cookmate_web.domain.recipe.dto.RecipeResponseDTO;
 import org.apache.ibatis.annotations.Mapper;
@@ -140,11 +141,30 @@ public interface RecipeMapper {
      * @param recipeSeq 레시피 시퀀스
      * @param hstgSeq 해시태그 시퀀스
      */
-    void insertRecipeHashtag(@org.apache.ibatis.annotations.Param("recipeSeq") Long recipeSeq, @org.apache.ibatis.annotations.Param("hstgSeq") Long hstgSeq);
+    void insertRecipeHashtag(@Param("recipeSeq") Long recipeSeq, @Param("hstgSeq") Long hstgSeq);
 
     /**
      * 레시피 해시태그 매핑 전체 삭제
      * @param recipeSeq 레시피 시퀀스
      */
     void deleteRecipeHashtags(Long recipeSeq);
+
+    /*
+    ======================
+    좋아요 관련
+    ======================
+     */
+    /**
+     * 사용자 좋아요 상태 확인
+     * @param request 좋아요 토글 요청 데이터
+     * @return 1: 좋아요, -1: 좋아요 취소, null: 내역 없음
+     */
+    LikeDTO.Response checkUserLike(LikeDTO.Request request);
+
+    /**
+     * 좋아요 신규 등록 및 상태 변경
+     * @param request 좋아요 토글 요청 데이터
+     * @return 변경된 좋아요 상태
+     */
+    LikeDTO.Response upsertLike(LikeDTO.Request request);
 }
