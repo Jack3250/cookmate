@@ -47,11 +47,13 @@ public class RecipeRequestDTO {
         private String recipeDifficultCd;  // 레시피 난이도 코드
         private String categoryCd;         // 카테고리 코드
         private String recipeStatus;       // 레시피 상태
+        private String openYn;             // 공개 여부
         private String fileGrpId;          // 파일 그룹 ID
         private String rgtrKey;            // 등록자 키
 
         private List<String> deleteFileIds;   // 삭제 파일 ID
 
+        private List<String> hashtags;        // 해시태그 목록
         private List<Ingredient> ingredients; // 재료
         private List<Step> steps;             // 단계
     }

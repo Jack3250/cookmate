@@ -38,9 +38,13 @@ public class RecipeService {
     private final RecipeMapper recipeMapper;
     private final FileService fileService;
 
+    /*
+    ======================
+    레시피 관련
+    ======================
+     */
     /**
      * 레시피 정보 목록 페이징 및 조건 조회
-     *
      * @param request 검색 및 페이징 조건 DTO
      * @return 레시피 목록 및 페이징 정보 응답 DTO
      */
@@ -79,46 +83,7 @@ public class RecipeService {
     }
 
     /**
-     * 레시피 정보 등록
-     *
-     * @param loginId       로그인 ID
-     * @param recipe       저장 요청 데이터
-     * @param mainImage     메인 사진
-     * @param stepImagesMap 단계별 사진 목록
-     * @return 레시피 ID
-     */
-    @Transactional
-    public String insertRecipeInfo(String loginId,
-                                   RecipeRequestDTO.Recipe recipe,
-                                   List<MultipartFile> mainImage,
-                                   Map<Integer, List<MultipartFile>> stepImagesMap) {
-        String rgtrKey = "testuserkey";
-
-        // 파일 저장
-        String mainFileGrpId = null;
-        if (mainImage != null && !mainImage.isEmpty()) {
-            mainFileGrpId = fileService.saveFile(mainImage, null, rgtrKey);
-        }
-
-        String recipeId = KeygenUtil.generateKey();
-        recipe.setRecipeId(recipeId);
-        recipe.setFileGrpId(mainFileGrpId);
-        recipe.setRgtrKey(rgtrKey);
-
-        // 레시피 정보 등록
-        recipeMapper.insertRecipeInfo(recipe);
-        Long recipeSeq = recipe.getRecipeSeq();
-
-        // 레시피 재료, 단계 정보 등록
-        insertRecipeIngredient(recipe, recipeSeq);
-        insertRecipeSteps(recipe, stepImagesMap, rgtrKey, recipeSeq);
-
-        return recipeId;
-    }
-
-    /**
      * 레시피 정보 상세 조회
-     *
      * @param recipeId 레시피 ID
      * @return 레시피 상세 정보
      */
@@ -150,8 +115,45 @@ public class RecipeService {
     }
 
     /**
+     * 레시피 정보 등록
+     * @param loginId       로그인 ID
+     * @param recipe       저장 요청 데이터
+     * @param mainImage     메인 사진
+     * @param stepImagesMap 단계별 사진 목록
+     * @return 레시피 ID
+     */
+    @Transactional
+    public String insertRecipeInfo(String loginId,
+                                   RecipeRequestDTO.Recipe recipe,
+                                   List<MultipartFile> mainImage,
+                                   Map<Integer, List<MultipartFile>> stepImagesMap) {
+        String rgtrKey = "testuserkey";
+
+        // 파일 저장
+        String mainFileGrpId = null;
+        if (mainImage != null && !mainImage.isEmpty()) {
+            mainFileGrpId = fileService.saveFile(mainImage, null, rgtrKey);
+        }
+
+        String recipeId = KeygenUtil.generateKey();
+        recipe.setRecipeId(recipeId);
+        recipe.setFileGrpId(mainFileGrpId);
+        recipe.setRgtrKey(rgtrKey);
+
+        // 레시피 정보 등록
+        recipeMapper.insertRecipeInfo(recipe);
+        Long recipeSeq = recipe.getRecipeSeq();
+
+        // 레시피 재료, 단계 정보 등록
+        insertRecipeIngredient(recipe, recipeSeq);
+        insertRecipeSteps(recipe, stepImagesMap, rgtrKey, recipeSeq);
+        insertRecipeHashtags(recipe.getHashtags(), recipeSeq);
+
+        return recipeId;
+    }
+
+    /**
      * 레시피 정보 수정
-     *
      * @param loginId       로그인 ID
      * @param request       수정 요청 데이터
      * @param mainImages    메인 사진
@@ -197,7 +199,6 @@ public class RecipeService {
 
     /**
      * 레시피 정보 삭제
-     *
      * @param recipeId 레시피 ID
      * @param loginId  로그인 ID
      */
@@ -222,10 +223,8 @@ public class RecipeService {
     헬퍼 메소드
     ========================================================
      */
-
     /**
      * 레시피 재료 정보 등록
-     *
      * @param recipe   저장 요청 데이터
      * @param recipeSeq 레시피 시퀀스
      */
@@ -240,7 +239,6 @@ public class RecipeService {
 
     /**
      * 레시피 단계 정보 등록
-     *
      * @param recipe       저장 요청 데이터
      * @param stepImagesMap 단계별 사진 목록
      * @param userKey       등록자 키
@@ -274,8 +272,31 @@ public class RecipeService {
     }
 
     /**
+     * 레시피 해시태그 정보 등록
+     * @param hashtags  해시태그 목록
+     * @param recipeSeq 레시피 시퀀스
+     */
+    private void insertRecipeHashtags(List<String> hashtags, Long recipeSeq) {
+        recipeMapper.deleteRecipeHashtags(recipeSeq); // 기존 매핑 삭제
+        if (hashtags == null || hashtags.isEmpty()) {
+            return;
+        }
+
+        for (String tag : hashtags) {
+            // 해시태그가 기존에 존재하면 무시, 없으면 생성
+            recipeMapper.insertHashtag(KeygenUtil.generateKey(), tag);
+
+            // 해시태그명으로 시퀀스 조회
+            Long hstgSeq = recipeMapper.selectHashtagSeqByName(tag);
+            if (hstgSeq != null) {
+                // 레시피 해시태그 매핑 등록
+                recipeMapper.insertRecipeHashtag(recipeSeq, hstgSeq);
+            }
+        }
+    }
+
+    /**
      * 단계별 사진 추출
-     *
      * @param recipe          저장 요청 데이터
      * @param multipartRequest 단계별 사진을 추출하기 위한 요청 객체
      * @return 단계별 사진 목록
