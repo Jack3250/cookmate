@@ -30,8 +30,7 @@ public class RecipeRequestDTO {
         private String recipeDifficultCd; // 레시피 난이도 코드
         private String searchKeyword;     // 검색어
         private String dateRange;         // 작성일 기간 (1D, 1W, 1M, 전체: 빈 값 '')
-        private Integer minViews;         // 최소 조회 수
-        private Integer minLikes;         // 최소 좋아요 수
+        private String sortType;          // 정렬 기준 (popular, latest, views, comment)
     }
 
     @Getter

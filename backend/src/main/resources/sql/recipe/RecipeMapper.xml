@@ -66,12 +66,6 @@
               OR R.DISH_NM LIKE CONCAT('%', #{searchKeyword}, '%')
           )
         </if>
-        <if test="minViews != null and minViews > 0">
-          AND R.VIEW_CNT >= #{minViews}
-        </if>
-        <if test="minLikes != null and minLikes > 0">
-          AND (SELECT COUNT(*) FROM LIKES L WHERE L.TGT_SEQ = R.RECIPE_SEQ) >= #{minLikes}
-        </if>
         <if test="dateRange != null and dateRange != ''">
           <choose>
             <when test='dateRange == "1D"'>
@@ -85,7 +79,17 @@
             </when>
           </choose>
         </if>
-        ORDER BY R.REG_DT DESC
+        <choose>
+          <when test="sortType == 'popular'">
+            ORDER BY LIKE_CNT DESC, R.REG_DT DESC
+          </when>
+          <when test="sortType == 'views'">
+            ORDER BY R.VIEW_CNT DESC, R.REG_DT DESC
+          </when>
+          <otherwise>
+            ORDER BY R.REG_DT DESC
+          </otherwise>
+        </choose>
         <include refid="pagination.end" />
     </select>
 
