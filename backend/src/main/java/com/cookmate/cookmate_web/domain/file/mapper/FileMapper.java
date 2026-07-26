@@ -27,17 +27,31 @@ public interface FileMapper {
      * =======================
      */
     /**
-     * 파일 그룹 등록
-     * @param fileGroupInfo 파일 그룹 정보
-     */
-    void insertFileGroup(FileDTO.FileGroupInfo fileGroupInfo);
-
-    /**
      * 파일 그룹 조회
      * @param fileGrpId 파일 그룹 ID
      * @return 파일 그룹 정보
      */
     FileDTO.FileGroupInfo selectFileGroup(String fileGrpId);
+
+    /**
+     * 파일 그룹 번호(SEQ)로 파일 그룹 조회
+     * @param fileGrpSeq 파일 그룹 SEQ
+     * @return 파일 그룹 정보
+     */
+    FileDTO.FileGroupInfo selectFileGroupBySeq(Long fileGrpSeq);
+
+    /**
+     * 해당 그룹 미삭제 파일 수 조회
+     * @param fileGrpSeq 파일 그룹 Seq
+     * @return 파일 상세 정보
+     */
+    int countActiveFiles(Long fileGrpSeq);
+
+    /**
+     * 파일 그룹 등록
+     * @param fileGroupInfo 파일 그룹 정보
+     */
+    void insertFileGroup(FileDTO.FileGroupInfo fileGroupInfo);
 
     /**
      * 파일 그룹 삭제
@@ -51,19 +65,6 @@ public interface FileMapper {
      * =======================
      */
     /**
-     * 파일 상세 등록
-     * @param fileDetailInfo 파일 상세 정보
-     */
-    void insertFileDetail(FileDTO.FileDetailInfo fileDetailInfo);
-
-    /**
-     * 해당 그룹 미삭제 파일 수 조회
-     * @param fileGrpSeq 파일 그룹 Seq
-     * @return 파일 상세 정보
-     */
-    int countActiveFiles(Long fileGrpSeq);
-
-    /**
      * 파일 목록 조회
      * @param fileGrpSeq 파일 그룹 Seq
      * @return 파일 목록
@@ -76,6 +77,12 @@ public interface FileMapper {
      * @return 파일 상세 정보
      */
     FileDTO.FileDetailInfo selectFileDetail(String fileId);
+
+    /**
+     * 파일 상세 등록
+     * @param fileDetailInfo 파일 상세 정보
+     */
+    void insertFileDetail(FileDTO.FileDetailInfo fileDetailInfo);
 
     /**
      * 파일 삭제

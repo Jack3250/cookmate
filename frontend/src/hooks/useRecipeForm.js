@@ -84,6 +84,80 @@ export function useRecipeForm() {
     initCodes();
   }, [fetchCodes]);
 
+  // 수정 모드 시 기존 레시피 데이터 로드
+  useEffect(() => {
+    if (isEditMode) {
+      loadOriginalRecipe();
+    }
+  }, [recipeId]);
+
+  /**
+   * 수정할 레시피 원본 데이터 로드 함수
+   */
+  const loadOriginalRecipe = async () => {
+    try {
+      setLoading(true);
+
+      const data = await retrieveRecipeInfo(recipeId);
+
+      // 기본 정보 세팅
+      setRecipeForm({
+        recipeTtl: data.recipeTtl || ""
+        , dishNm: data.dishNm || ""
+        , categoryCd: data.categoryCd || ""
+        , recipeDifficultCd: data.recipeDifficultCd || ""
+        , cookingTime: data.cookingTime ? String(data.cookingTime) : ""
+        , recipeCn: data.recipeCn || ""
+        , recipeStatusCd: data.recipeStatus || "02"
+        , openYn: data.openYn || "Y"
+      });
+
+      // 대표 이미지 세팅
+      if (data.mainImageUrls && data.mainImageUrls.length > 0) {
+        setMainImage({
+          file: null
+          , previewUrl: data.mainImageUrls[0]
+          , fileGrpId: data.fileGrpId || null
+        });
+      }
+
+      // 재료 정보 세팅
+      if (data.ingredients && data.ingredients.length > 0) {
+        setIngredients(
+          data.ingredients.map((ing) => ({
+            ingrdNm: ing.ingrdNm || ""
+            , ingrdAmt: ing.ingrdAmt != null ? String(ing.ingrdAmt) : ""
+            , ingrdUnt: ing.ingrdUnt || ""
+          }))
+        );
+      }
+
+      // 조리 단계 정보 세팅
+      if (data.steps && data.steps.length > 0) {
+        setSteps(
+          data.steps.map((st, idx) => ({
+            stepNo: st.stepNo || idx + 1
+            , stepCn: st.stepCn || ""
+            , fileGrpId: st.fileGrpId || null
+            , previewUrl: st.stepImageUrls && st.stepImageUrls.length > 0 ? st.stepImageUrls[0] : ""
+            , file: null
+          }))
+        );
+      }
+
+      // 해시태그 정보 세팅
+      if (data.hashtags && data.hashtags.length > 0) {
+        setHashtags(data.hashtags);
+      }
+
+    } catch (error) {
+      console.error("레시피 조회 실패:", error);
+      toast.error("레시피 정보를 불러오는 데 실패했습니다.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   /**
    * 기본 정보 입력값 변경 핸들러
    */
@@ -344,8 +418,13 @@ export function useRecipeForm() {
       });
 
       let responseId = recipeId;
+      if (isEditMode) {
+        await updateRecipeInfo(formData);
+        toast.success("레시피가 성공적으로 수정되었습니다.");
+      } else {
         responseId = await insertRecipeInfo(formData);
         toast.success("레시피가 성공적으로 등록되었습니다.");
+      }
 
       navigate(`/recipes/detail/${responseId}`);
     } catch (error) {

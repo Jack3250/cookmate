@@ -58,8 +58,10 @@ public class RecipeResponseDTO {
         private String writerName;        // 작성자 명
         private LocalDateTime regDt;      // 등록 일시
         private String recipeStatus;      // 레시피 상태
+        private String openYn;            // 공개 여부
         private String fileGrpId;         // 파일 그룹 ID
 
+        private List<String> hashtags;        // 해시태그 목록
         private List<String> mainImageUrls;   // 메인 이미지 URL
         private List<Ingredient> ingredients; // 재료
         private List<Step> steps;             // 단계

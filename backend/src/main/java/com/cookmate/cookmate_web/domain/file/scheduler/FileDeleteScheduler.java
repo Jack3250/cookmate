@@ -53,7 +53,7 @@ public class FileDeleteScheduler {
 
         for (FileDTO.FileDetailInfo fileDetail : oldFiles) {
             try {
-                FileDTO.FileGroupInfo fileGroup = fileMapper.selectFileGroup(fileDetail.getFileId());
+                FileDTO.FileGroupInfo fileGroup = fileMapper.selectFileGroupBySeq(fileDetail.getFileGrpSeq());
 
                 if (fileGroup != null) {
                     String fullPath = uploadDir + fileGroup.getFilePath() + File.separator + fileDetail.getFileSaveNm();

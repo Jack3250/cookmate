@@ -47,9 +47,9 @@ public class FileService {
 
     /**
      * 파일 저장
-     * @param files 파일
+     * @param files     파일
      * @param fileGrpId 파일 그룹 ID
-     * @param rgtrKey 등록자 키
+     * @param rgtrKey   등록자 키
      * @return 파일 그룹 ID
      */
     @Transactional
@@ -149,8 +149,8 @@ public class FileService {
     public File getFile(String fileId) {
         FileDTO.FileDetailInfo fileDetail = getFileDetail(fileId);
 
-        // 연관된 그룹 정보를 PK(fileGrpId)로 조회
-        FileDTO.FileGroupInfo fileGroup = fileMapper.selectFileGroup(fileDetail.getFileId());
+        // 연관된 그룹 정보를 PK(fileGrpSeq)로 조회
+        FileDTO.FileGroupInfo fileGroup = fileMapper.selectFileGroupBySeq(fileDetail.getFileGrpSeq());
         if (fileGroup == null) {
             throw new CustomException(ErrorCode.FILE_NOT_FOUND);
         }
@@ -201,10 +201,10 @@ public class FileService {
 
     /**
      * 파일 수정
-     * @param fileGrpId 파일 그룹 ID
-     * @param newFiles 새로 추가된 파일 목록
+     * @param fileGrpId   파일 그룹 ID
+     * @param newFiles    새로 추가된 파일 목록
      * @param deleteFiles 삭제 요청된 파일 목록
-     * @param rgtrKey 등록자 키
+     * @param rgtrKey     등록자 키
      */
     @Transactional
     public void updateFiles(String fileGrpId, List<MultipartFile> newFiles, List<String> deleteFiles, String rgtrKey) {
@@ -240,7 +240,7 @@ public class FileService {
 
         List<FileDTO.FileDetailInfo> fileDetailList = fileMapper.selectAllFiles(fileGroup.getFileGrpSeq());
 
-        for(FileDTO.FileDetailInfo fileDetail : fileDetailList) {
+        for (FileDTO.FileDetailInfo fileDetail : fileDetailList) {
             String fileUrls = "/files/view/" + fileDetail.getFileId();
             result.add(fileUrls);
         }
@@ -253,7 +253,6 @@ public class FileService {
     헬퍼 메소드
     ========================================================
      */
-
     /**
      * 오늘 날짜 경로 추출 함수
      * @return yyyy/MM/dd 형식의 오늘 날짜

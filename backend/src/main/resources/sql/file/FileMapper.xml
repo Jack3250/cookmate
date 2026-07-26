@@ -23,6 +23,14 @@
         AND DEL_YN = 'N'
     </select>
 
+    <select id="selectFileGroupBySeq" parameterType="long" resultType="com.cookmate.cookmate_web.domain.file.dto.FileDTO$FileGroupInfo">
+        SELECT /* fileMapper.selectFileGroupBySeq => 파일 그룹 번호(SEQ)로 파일 그룹 조회 */
+            FILE_GRP_SEQ, FILE_GRP_ID, FILE_PATH, RGTR_KEY, REG_DT, DEL_YN
+        FROM FILE_GROUP
+        WHERE FILE_GRP_SEQ = #{fileGrpSeq}
+          AND DEL_YN = 'N'
+    </select>
+
     <update id="deleteFileGroup" parameterType="string">
         UPDATE FILE_GROUP /* fileMapper.deleteFileGroup => 파일 그룹 삭제 */
         SET DEL_YN = 'Y'

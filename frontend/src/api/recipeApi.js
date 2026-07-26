@@ -11,12 +11,36 @@ export const selectRecipeInfoList = async (params) => {
 };
 
 /**
+ * 레시피 정보 상세 조회
+ * @param {String} recipeId 레시피 ID
+ * @returns {Promise<Object>} 레시피 상세 정보
+ */
+export const retrieveRecipeInfo = async (recipeId) => {
+  const response = await client.get(`/recipe/detail/${recipeId}`);
+  return response.data;
+};
+
+/**
  * 레시피 정보 등록
  * @param {FormData} formData 레시피 등록 폼 데이터 (JSON 문자열 데이터 + 메인 이미지 + 단계별 이미지)
  * @returns {Promise<String>} 생성된 레시피 ID
  */
 export const insertRecipeInfo = async (formData) => {
   const response = await client.post('/recipe/insert', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+  return response.data;
+};
+
+/**
+ * 레시피 정보 수정
+ * @param {FormData} formData 레시피 수정 폼 데이터 (JSON 문자열 데이터 + 변경 이미지 + 삭제 파일 ID 목록)
+ * @returns {Promise<Number>} 수정된 레시피 시퀀스
+ */
+export const updateRecipeInfo = async (formData) => {
+  const response = await client.put('/recipe/update', formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
     },

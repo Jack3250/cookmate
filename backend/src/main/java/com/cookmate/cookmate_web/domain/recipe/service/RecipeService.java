@@ -111,6 +111,10 @@ public class RecipeService {
         }
         recipe.setSteps(steps);
 
+        // 레시피 해시태그 목록 조회
+        List<String> hashtags = recipeMapper.selectRecipeHashtags(recipe.getRecipeSeq());
+        recipe.setHashtags(hashtags);
+
         return recipe;
     }
 
@@ -190,9 +194,10 @@ public class RecipeService {
         recipeMapper.deleteRecipeIngredientList(recipeSeq); // 레시피 재료 목록 삭제
         recipeMapper.deleteRecipeStepList(recipeSeq);       // 레시피 단계 목록 삭제
 
-        // 레시피 재료, 단계 정보 등록
+        // 레시피 재료, 단계, 해시태그 정보 등록
         insertRecipeIngredient(request, recipeSeq);
         insertRecipeSteps(request, stepImagesMap, mdfrKey, recipeSeq);
+        insertRecipeHashtags(request.getHashtags(), recipeSeq);
 
         return recipe.getRecipeSeq();
     }
