@@ -4,6 +4,7 @@ import { retrieveRecipeInfo, deleteRecipeInfo, toggleRecipeLike } from '../../ap
 import useCodeStore from '../../stores/useCodeStore';
 import { gfnToast } from '../../utils/toastUtils';
 import { gfnConfirm } from '../../utils/confirmUtils';
+import { useLike } from '../../hooks/useLike';
 import RecipeHeader from '../../components/recipe/RecipeHeader';
 import IngredientList from '../../components/recipe/IngredientList';
 import StepList from '../../components/recipe/StepList';
@@ -20,9 +21,13 @@ function RecipeDetailPage() {
   const [recipe, setRecipe] = useState(null); // 레시피 상세 데이터
   const [loading, setLoading] = useState(true); // 로딩 상태
 
-  // 좋아요 디바운스를 위한 Ref
-  const clickCountRef = useRef(0);
-  const likeTimerRef = useRef(null);
+  // 좋아요 공통 훅 사용
+  const { isLiked, likeCnt, handleLikeClick } = useLike({
+    initialIsLiked: recipe?.isLiked,
+    initialLikeCnt: recipe?.likeCnt,
+    toggleApi: () => toggleRecipeLike(recipeId),
+    targetName: '레시피'
+  });
 
   // 공통코드 스토어 바인딩
   const fetchCodes = useCodeStore((state) => state.fetchCodes);
@@ -72,72 +77,6 @@ function RecipeDetailPage() {
         gfnToast('common.fail.delete', ['레시피']); // {0} 삭제에 실패했습니다.
       }
     }
-  };
-
-  /**
-   * 좋아요 버튼 클릭 핸들러
-   */
-  const handleLikeClick = () => {
-    // 1. 화면 내 상태 즉시 업데이트 (Optimistic UI)
-    setRecipe(prev => {
-      const newLikeStatus = !prev.isLiked;
-      return {
-        ...prev,
-        isLiked: newLikeStatus,
-        likeCnt: prev.likeCnt + (newLikeStatus ? 1 : -1)
-      };
-    });
-
-    // 2. 디바운스 처리하여 API 호출
-    clickCountRef.current += 1;
-
-    if (likeTimerRef.current) {
-      clearTimeout(likeTimerRef.current);
-    }
-
-    likeTimerRef.current = setTimeout(async () => {
-      const clicks = clickCountRef.current;
-      clickCountRef.current = 0; // 초기화
-
-      // 홀수 번 클릭했을 때만 서버에 상태 변경 요청
-      if (clicks % 2 !== 0) {
-        try {
-          const serverStatus = await toggleRecipeLike(recipeId);
-
-          // 안전장치: 서버 상태와 프론트 상태가 다르면 동기화
-          setRecipe(prev => {
-            if (prev.isLiked !== serverStatus) {
-              return {
-                ...prev,
-                isLiked: serverStatus,
-                likeCnt: prev.likeCnt + (serverStatus ? 1 : -1)
-              };
-            }
-            return prev;
-          });
-
-          if (serverStatus) {
-            gfnToast('like.success', ['레시피']); // 이 {0}를 좋아합니다!
-          }
-        } catch (error) {
-          if (error.response && error.response.status === 401) {
-            gfnToast('auth.login.required'); // 로그인이 필요한 서비스입니다.
-          } else {
-            gfnToast('sys.process.error', ['좋아요']); // {0} 처리 중 오류가 발생했습니다.
-            console.error('좋아요 에러:', error);
-          }
-          // 에러 발생 시 UI 롤백
-          setRecipe(prev => {
-            const rollbackStatus = !prev.isLiked;
-            return {
-              ...prev,
-              isLiked: rollbackStatus,
-              likeCnt: prev.likeCnt + (rollbackStatus ? 1 : -1)
-            };
-          });
-        }
-      }
-    }, 500); // 500ms 디바운스
   };
 
   // 로딩 상태 렌더링
@@ -224,8 +163,8 @@ function RecipeDetailPage() {
       {/* 좋아요 및 소셜 액션 버튼 영역 */}
       <div className="flex justify-center items-center mt-12 mb-4 border-t border-gray-200 dark:border-zinc-700 pt-10">
         <LikeButton
-          isLiked={recipe.isLiked}
-          likeCnt={recipe.likeCnt}
+          isLiked={isLiked}
+          likeCnt={likeCnt}
           onClick={handleLikeClick}
           size="lg"
         />
