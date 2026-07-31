@@ -1,15 +1,39 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>cookmate-front</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+
+<head>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap"
+    rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cookmate-front</title>
+  <!-- 새로고침 시 테마 깜빡임 방지 -->
+  <script>
+    console.log("[index.html] 테마 초기화 스크립트 실행됨");
+    try {
+      const storage = localStorage.getItem('user-storage');
+      if (storage) {
+        const parsed = JSON.parse(storage);
+
+        if (parsed && parsed.state && parsed.state.theme === 'dark') {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+      } else {
+        console.log("[index.html] 저장된 테마 설정이 없습니다.");
+      }
+    } catch (e) {
+      console.log("[index.html] 스크립트 에러:", e);
+    }
+  </script>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+
 </html>
