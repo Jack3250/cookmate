@@ -21,7 +21,25 @@ export const useMessageStore = create((set, get) => ({
     }
   },
 
-  getMessage: (msgCd) => {
-    return get().messages[msgCd];
+  getMessage: (msgCd, ...params) => {
+    const msgObj = get().messages[msgCd];
+    if (!msgObj) return undefined;
+
+    // 파라미터가 주어지면 메시지 텍스트({0}, {1})를 치환하여 새로운 객체 반환
+    if (params && params.length > 0) {
+      let text = msgObj.msgCn;
+      params.forEach((param, index) => {
+        text = text.replace(new RegExp(`\\{${index}\\}`, 'g'), param);
+      });
+      return { ...msgObj, msgCn: text };
+    }
+
+    return msgObj;
+  },
+
+  // 텍스트(msgCn)만 바로 필요한 경우를 위한 함수
+  getMsgText: (msgCd, ...params) => {
+    const msgObj = get().getMessage(msgCd, ...params);
+    return msgObj ? msgObj.msgCn : '';
   }
 }));

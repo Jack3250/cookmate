@@ -8,8 +8,8 @@ import { useMessageStore } from '../stores/useMessageStore';
  */
 export const gfnToast = (msgCd, params = []) => {
 
-  // 스토어에서 메세지 객체 조회
-  const messageObj = useMessageStore.getState().getMessage(msgCd);
+  // 스토어에서 메세지 객체 조회 (파라미터 포함)
+  const messageObj = useMessageStore.getState().getMessage(msgCd, ...params);
 
   if (!messageObj) {
     // 메시지 코드를 찾지 못한 경우 기본 에러 팝업
@@ -18,13 +18,7 @@ export const gfnToast = (msgCd, params = []) => {
     return;
   }
 
-  let text = messageObj.msgCn;
-
-  // 파라미터 치환 ({0}, {1} 등)
-  params.forEach((param, index) => {
-    const regex = new RegExp(`\\{${index}\\}`, 'g');
-    text = text.replace(regex, param);
-  });
+  const text = messageObj.msgCn;
 
   // msgTy에 따른 토스트 종류 분기
   const msgTy = messageObj.msgTy;
@@ -46,5 +40,15 @@ export const gfnToast = (msgCd, params = []) => {
       // 기본은 일반 토스트로 띄움
       toast(text);
       break;
+  }
+};
+
+/**
+ * 텍스트 메시지를 직접 받아 에러 토스트 출력 (백엔드 예외 메시지 출력용)
+ * @param {string} message - 출력할 에러 메시지 텍스트
+ */
+export const gfnError = (message) => {
+  if (message) {
+    toast.error(message);
   }
 };
