@@ -80,7 +80,12 @@
              , R.RECIPE_DIFFICULT_CD
              , R.CATEGORY_CD
              , R.VIEW_CNT
-             , (SELECT COUNT(*) FROM LIKES L WHERE L.TGT_SEQ = R.RECIPE_SEQ AND L.TGT_TY = 'RECIPE' AND L.DEL_YN = 'N') AS LIKE_CNT
+             , ( SELECT COUNT(TGT_SEQ)
+                 FROM LIKES
+                 WHERE TGT_SEQ = R.RECIPE_SEQ
+                   AND TGT_TY = 'RECIPE'
+                   AND DEL_YN = 'N'
+                ) AS LIKE_CNT
              , U.USER_NM AS WRITER_NAME
              , R.REG_DT
              , R.RECIPE_STATUS

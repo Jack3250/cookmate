@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { retrieveRecipeInfo, deleteRecipeInfo, toggleRecipeLike } from '../../api/recipeApi';
 import useCodeStore from '../../stores/useCodeStore';
@@ -18,6 +18,10 @@ function RecipeDetailPage() {
   // 상태값 정의
   const [recipe, setRecipe] = useState(null); // 레시피 상세 데이터
   const [loading, setLoading] = useState(true); // 로딩 상태
+
+  // 좋아요 디바운스를 위한 Ref
+  const clickCountRef = useRef(0);
+  const likeTimerRef = useRef(null);
 
   // 공통코드 스토어 바인딩
   const fetchCodes = useCodeStore((state) => state.fetchCodes);
@@ -72,29 +76,67 @@ function RecipeDetailPage() {
   /**
    * 좋아요 버튼 클릭 핸들러
    */
-  const handleLikeClick = async () => {
-    try {
-      // API 호출하여 좋아요 토글
-      const newLikeStatus = await toggleRecipeLike(recipeId);
-
-      // 화면 내 상태 즉시 업데이트 (Optimistic UI 업데이트)
-      setRecipe(prev => ({
+  const handleLikeClick = () => {
+    // 1. 화면 내 상태 즉시 업데이트 (Optimistic UI)
+    setRecipe(prev => {
+      const newLikeStatus = !prev.isLiked;
+      return {
         ...prev,
         isLiked: newLikeStatus,
         likeCnt: prev.likeCnt + (newLikeStatus ? 1 : -1)
-      }));
+      };
+    });
 
-      if (newLikeStatus) {
-        toast.success('이 레시피를 좋아합니다!');
-      }
-    } catch (error) {
-      if (error.response && error.response.status === 401) {
-        toast.error('로그인이 필요한 기능입니다.');
-      } else {
-        toast.error('좋아요 처리 중 오류가 발생했습니다.');
-        console.error('좋아요 에러:', error);
-      }
+    // 2. 디바운스 처리하여 API 호출
+    clickCountRef.current += 1;
+
+    if (likeTimerRef.current) {
+      clearTimeout(likeTimerRef.current);
     }
+
+    likeTimerRef.current = setTimeout(async () => {
+      const clicks = clickCountRef.current;
+      clickCountRef.current = 0; // 초기화
+
+      // 홀수 번 클릭했을 때만 서버에 상태 변경 요청
+      if (clicks % 2 !== 0) {
+        try {
+          const serverStatus = await toggleRecipeLike(recipeId);
+          
+          // 안전장치: 서버 상태와 프론트 상태가 다르면 동기화
+          setRecipe(prev => {
+            if (prev.isLiked !== serverStatus) {
+              return {
+                ...prev,
+                isLiked: serverStatus,
+                likeCnt: prev.likeCnt + (serverStatus ? 1 : -1)
+              };
+            }
+            return prev;
+          });
+
+          if (serverStatus) {
+            toast.success('이 레시피를 좋아합니다!');
+          }
+        } catch (error) {
+          if (error.response && error.response.status === 401) {
+            toast.error('로그인이 필요한 기능입니다.');
+          } else {
+            toast.error('좋아요 처리 중 오류가 발생했습니다.');
+            console.error('좋아요 에러:', error);
+          }
+          // 에러 발생 시 UI 롤백
+          setRecipe(prev => {
+            const rollbackStatus = !prev.isLiked;
+            return {
+              ...prev,
+              isLiked: rollbackStatus,
+              likeCnt: prev.likeCnt + (rollbackStatus ? 1 : -1)
+            };
+          });
+        }
+      }
+    }, 500); // 500ms 디바운스
   };
 
   // 로딩 상태 렌더링
