@@ -23,7 +23,8 @@ import lombok.Setter;
 public class CmmnMsgDTO {
     private String msgCd;
     private String msgCn;
-    private String msgTy;
+    private String msgDomain; // 기존 msg_ty (도메인 구분)
+    private String msgTy; // 신규 msg_ty (공통코드 01, 02 등)
     private String rgtrKey;
 
     private String regDt;

@@ -1,5 +1,7 @@
 package com.cookmate.cookmate_web.domain.common.mapper;
 
+import java.util.List;
+
 import com.cookmate.cookmate_web.domain.common.dto.CmmnMsgDTO;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -26,4 +28,10 @@ public interface CmmnMsgMapper {
      * @return 메세지 정보
      */
     CmmnMsgDTO selectCmmnMsg(String msgCd);
+
+    /**
+     * 공통 메세지 목록 전체 조회
+     * @return 메세지 목록
+     */
+    List<CmmnMsgDTO> selectCmmnMsgList();
 }
