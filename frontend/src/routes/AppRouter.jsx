@@ -31,16 +31,6 @@ function AppRouter() {
         <Route path="/" element={<MainPage />} />
         <Route path="/main" element={<MainPage />} />
 
-        {/* 로그인 */}
-        <Route path="/login" element={<LoginPage />} />
-
-        {/* 회원가입 */}
-        <Route path="/join">
-          <Route index element={<TermsPage />} /> {/* 약관동의 */}
-          <Route path="form" element={<RegisterFormPage />} /> {/* 정보입력 */}
-          <Route path="complete" element={<RegisterComplete />} /> {/* 완료 */}
-        </Route>
-
         {/* 레시피 */}
         <Route path="/recipes">
           <Route path="list" element={<RecipeListPage />} /> {/* 리스트 */}
@@ -62,6 +52,16 @@ function AppRouter() {
           <Route path="edit/:boardId/:postId" element={<BoardFormPage />} /> {/* 수정 */}
           <Route path="detail/:boardId/:postId" element={<BoardDetailPage />} /> {/* 상세 */}
         </Route>
+      </Route>
+
+      {/* 로그인 */}
+      <Route path="/login" element={<LoginPage />} />
+
+      {/* 회원가입 */}
+      <Route path="/join">
+        <Route index element={<TermsPage />} /> {/* 약관동의 */}
+        <Route path="form" element={<RegisterFormPage />} /> {/* 정보입력 */}
+        <Route path="complete" element={<RegisterComplete />} /> {/* 완료 */}
       </Route>
 
       {/* 404 페이지 */}
