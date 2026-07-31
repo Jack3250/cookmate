@@ -4,6 +4,7 @@ import './App.css';
 import { Toaster } from 'react-hot-toast';
 import React, { useEffect } from 'react';
 import { useMessageStore } from './stores/useMessageStore';
+import ConfirmModal from './components/common/ConfirmModal';
 
 function App() {
   const loadMessages = useMessageStore(state => state.loadMessages);
@@ -18,6 +19,7 @@ function App() {
         reverseOrder={false}
       />
 
+      <ConfirmModal />
       <AppRouter />
     </BrowserRouter>
   );
