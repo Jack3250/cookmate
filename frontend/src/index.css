@@ -5,3 +5,15 @@
 body {
   font-family: 'Noto Sans KR', sans-serif;
 }
+
+@layer base {
+
+  /* 브라우저 자동완성(Autofill) 배경색 오버라이드 방지 트릭 */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active {
+    -webkit-transition: color 9999s ease-out, background-color 9999s ease-out;
+    -webkit-transition-delay: 9999s;
+  }
+}

@@ -18,3 +18,53 @@ export const logoutApi = async () => {
   const response = await client.post('/users/logout');
   return response.data;
 };
+
+/**
+ * 회원가입 API
+ * @param {FormData} formData 회원가입 폼 데이터 (프로필 이미지 포함)
+ * @returns {Promise<Object>} 응답 데이터
+ */
+export const registerApi = async (formData) => {
+  const response = await client.post('/users/regist', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+  return response.data;
+};
+
+/**
+ * 아이디 중복 확인 API
+ * @param {string} loginId 확인할 아이디
+ * @returns {Promise<boolean>} 사용 가능 여부
+ */
+export const checkIdApi = async (loginId) => {
+  const response = await client.get('/users/check-id', {
+    params: { loginId },
+  });
+  return response.data;
+};
+
+/**
+ * 닉네임 중복 확인 API
+ * @param {string} nickname 확인할 닉네임
+ * @returns {Promise<boolean>} 사용 가능 여부
+ */
+export const checkNicknameApi = async (nickname) => {
+  const response = await client.get('/users/check-nickname', {
+    params: { nickname },
+  });
+  return response.data;
+};
+
+/**
+ * 이메일 중복 확인 API
+ * @param {string} email 확인할 이메일
+ * @returns {Promise<boolean>} 사용 가능 여부
+ */
+export const checkEmailApi = async (email) => {
+  const response = await client.get('/users/check-email', {
+    params: { email },
+  });
+  return response.data;
+};
