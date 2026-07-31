@@ -54,4 +54,10 @@ public interface UserMapper {
      * @param email 이메일
      */
     UserDTO.UserInfo selectEmail(String email);
+
+    /**
+     * 닉네임 중복 체크
+     * @param nickname 닉네임
+     */
+    UserDTO.UserInfo selectNickname(String nickname);
 }

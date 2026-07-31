@@ -8,21 +8,55 @@
     =======================
     -->
     <insert id="insertUser" parameterType="com.cookmate.cookmate_web.domain.users.dto.UserDTO$RegistRequest">
-        INSERT INTO USERS ( /* userMapper.insertUser => 회원가입 */
-            LOGIN_ID, USER_KEY, USER_NM, USER_BRTH, ZIP_CD, ADDR, ADDR_DTL,
-            TEL_PHONE, GENDER, PSWD, PSWD_ERR_CNT, EMAIL, NICKNAME, CRET_DT, DEL_YN
-        ) VALUES (
-            #{loginId}, #{userKey}, #{userNm}, #{userBrth}, #{zipCd}, #{addr}, #{addrDtl},
-            #{telPhone}, #{gender}, #{encPswd}, 0, #{email}, #{nickname}, CURRENT_TIMESTAMP, 'N'
-        )
+        /* UserMapper.insertUser : 회원가입 */
+        INSERT INTO USERS ( LOGIN_ID
+                          , USER_KEY
+                          , USER_NM
+                          , USER_BRTH
+                          , ZIP_CD
+                          , ADDR
+                          , ADDR_DTL
+                          , TEL_PHONE
+                          , GENDER
+                          , PSWD
+                          , PSWD_ERR_CNT
+                          , EMAIL
+                          , NICKNAME
+                          , CRET_DT
+                          , DEL_YN
+                          , MRKT_AGRE_YN
+                          , FILE_GRP_ID)
+        VALUES ( #{loginId}
+               , #{userKey}
+               , #{userNm}
+               , #{userBrth}
+               , #{zipCd}
+               , #{addr}
+               , #{addrDtl}
+               , #{telPhone}
+               , #{gender}
+               , #{encPswd}
+               , 0
+               , #{email}
+               , #{nickname}
+               , CURRENT_TIMESTAMP
+               , 'N'
+               , #{mrktAgreYn}
+               , #{fileGrpId})
     </insert>
 
     <select id="selectUserInfo" parameterType="string" resultType="com.cookmate.cookmate_web.domain.users.dto.UserDTO$UserInfo">
-        SELECT /* userMapper.selectUserInfo => 사용자 정보 조회 */
-            USER_KEY, PSWD, LOGIN_ID, USER_NM, NICKNAME, EMAIL
+        /* UserMapper.selectUserInfo : 사용자 정보 조회 */
+        SELECT USER_KEY
+               , PSWD
+               , LOGIN_ID
+               , USER_NM
+               , NICKNAME
+               , EMAIL
+               , FILE_GRP_ID
         FROM USERS
         WHERE LOGIN_ID = #{loginId}
-        AND DEL_YN = 'N'
+          AND DEL_YN = 'N'
     </select>
 
     <!--
@@ -31,16 +65,26 @@
     =======================
     -->
     <select id="selectLoginId" parameterType="string" resultType="com.cookmate.cookmate_web.domain.users.dto.UserDTO$UserInfo">
-        SELECT USER_SEQ /* userMapper.selectLoginId => 아이디 중복 체크 */
+        /* UserMapper.selectLoginId : 아이디 중복 체크 */
+        SELECT USER_KEY
         FROM USERS
         WHERE LOGIN_ID = #{loginId}
-        AND DEL_YN = 'N'
+          AND DEL_YN = 'N'
     </select>
 
     <select id="selectEmail" parameterType="string" resultType="com.cookmate.cookmate_web.domain.users.dto.UserDTO$UserInfo">
-        SELECT USER_SEQ /* userMapper.selectEmail => 이메일 중복 체크 */
+        /* UserMapper.selectEmail : 이메일 중복 체크 */
+        SELECT USER_KEY
         FROM USERS
         WHERE EMAIL = #{email}
-        AND DEL_YN = 'N'
+          AND DEL_YN = 'N'
+    </select>
+
+    <select id="selectNickname" parameterType="string" resultType="com.cookmate.cookmate_web.domain.users.dto.UserDTO$UserInfo">
+        /* UserMapper.selectNickname : 닉네임 중복 체크 */
+        SELECT USER_KEY
+        FROM USERS
+        WHERE NICKNAME = #{nickname}
+          AND DEL_YN = 'N'
     </select>
 </mapper>

@@ -36,7 +36,7 @@ public class UserDTO {
         private String loginId;
 
         @NotBlank(message = "{valid.user.pswd.required}")
-        @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[$@!%*#?&])[A-Za-z\\d$@!%*#?&]{8,16}$", message = "{valid.user.pswd.pattern}")
+        @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?~`])[A-Za-z\\d!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?~`]{8,16}$", message = "{valid.user.pswd.pattern}")
         private String pswd;
 
         private String encPswd;
@@ -64,6 +64,8 @@ public class UserDTO {
         private String zipCd;
         private String addr;
         private String addrDtl;
+        private String mrktAgreYn; // 마케팅 수신 동의 여부 ('Y' or 'N')
+        private String fileGrpId; // 프로필 사진 파일 그룹 ID
     }
 
     @Getter
@@ -88,5 +90,6 @@ public class UserDTO {
         private String userNm;
         private String nickname;
         private String email;
+        private String fileGrpId;
     }
 }

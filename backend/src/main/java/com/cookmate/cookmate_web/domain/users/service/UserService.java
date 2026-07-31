@@ -11,6 +11,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+import com.cookmate.cookmate_web.domain.file.service.FileService;
+import java.util.Collections;
 
 /**
  * @file        UserService.java
@@ -32,6 +35,7 @@ public class UserService {
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final HttpSession httpSession;
+    private final FileService fileService;
 
     /*
      * =======================
@@ -43,7 +47,7 @@ public class UserService {
      * @param request 회원 정보
      */
     @Transactional
-    public void insertUser(UserDTO.RegistRequest request) {
+    public void insertUser(UserDTO.RegistRequest request, MultipartFile profileImage) {
 
         // 아이디 중복 체크
         validateDuplicateLoginId(request.getLoginId());
@@ -57,6 +61,12 @@ public class UserService {
 
         request.setUserKey(userKey);
         request.setEncPswd(encPswd);
+
+        // 프로필 이미지 저장 처리
+        if (profileImage != null && !profileImage.isEmpty()) {
+            String fileGrpId = fileService.saveFile(Collections.singletonList(profileImage), null, userKey);
+            request.setFileGrpId(fileGrpId);
+        }
 
         // DB 저장
         userMapper.insertUser(request);
@@ -105,5 +115,32 @@ public class UserService {
         if (userMapper.selectEmail(email) != null) {
             throw new CustomException(ErrorCode.DUPLICATE_VALUE, new Object[]{"이메일"});
         }
+    }
+
+    /**
+     * 이메일 중복 여부 확인 (API용)
+     * @param email 이메일
+     * @return 사용 가능 여부 (true: 가능, false: 중복)
+     */
+    public boolean checkEmail(String email) {
+        return userMapper.selectEmail(email) == null;
+    }
+
+    /**
+     * 아이디 중복 여부 확인 (API용)
+     * @param loginId 아이디
+     * @return 사용 가능 여부 (true: 가능, false: 중복)
+     */
+    public boolean checkLoginId(String loginId) {
+        return userMapper.selectLoginId(loginId) == null;
+    }
+
+    /**
+     * 닉네임 중복 여부 확인 (API용)
+     * @param nickname 닉네임
+     * @return 사용 가능 여부 (true: 가능, false: 중복)
+     */
+    public boolean checkNickname(String nickname) {
+        return userMapper.selectNickname(nickname) == null;
     }
 }
