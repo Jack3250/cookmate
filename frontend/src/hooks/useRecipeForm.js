@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { retrieveRecipeInfo, insertRecipeInfo, updateRecipeInfo } from "../api/recipeApi";
 import useCodeStore from "../stores/useCodeStore";
-import toast from "react-hot-toast";
+import { gfnToast } from "../utils/toastUtils";
 
 /**
  * 레시피 등록 및 수정 폼 상태 및 비즈니스 로직을 캡슐화한 커스텀 훅
@@ -152,7 +152,7 @@ export function useRecipeForm() {
 
     } catch (error) {
       console.error("레시피 조회 실패:", error);
-      toast.error("레시피 정보를 불러오는 데 실패했습니다.");
+      gfnToast("common.fail.load", ["레시피 정보"]); // {0}을(를) 불러오는 데 실패했습니다.
     } finally {
       setLoading(false);
     }
@@ -217,7 +217,7 @@ export function useRecipeForm() {
    */
   const handleRemoveIngredient = (index) => {
     if (ingredients.length <= 1) {
-      toast.error("최소 1개 이상의 재료가 필요합니다.");
+      gfnToast("valid.require.min.count", ["1", "재료"]); // 최소 {0}개 이상의 {1}이(가) 필요합니다.  
       return;
     }
     setIngredients((prev) => prev.filter((_, idx) => idx !== index));
@@ -283,7 +283,7 @@ export function useRecipeForm() {
    */
   const handleRemoveStep = (index) => {
     if (steps.length <= 1) {
-      toast.error("최소 1개 이상의 조리 단계가 필요합니다.");
+      gfnToast("valid.require.min.count", ["1", "조리 단계"]); // 최소 {0}개 이상의 {1}이(가) 필요합니다.
       return;
     }
     setSteps((prev) => {
@@ -309,7 +309,7 @@ export function useRecipeForm() {
       if (!val) return;
 
       if (hashtags.length >= 10) {
-        toast.error("해시태그는 최대 10개까지 입력 가능합니다.");
+        gfnToast("valid.require.max.count", ["해시태그", "10"]); // {0}은(는) 최대 {1}개까지 입력 가능합니다.
         return;
       }
 
@@ -338,27 +338,34 @@ export function useRecipeForm() {
     // 임시저장(01)일 경우 최소한 제목만 입력되었는지 체크
     if (finalStatusCd === "01") {
       if (!recipeForm.recipeTtl.trim()) {
-        return toast.error("제목을 입력해 주세요.");
+        gfnToast("valid.require.input", ["제목"]); // {0}을(를) 입력해 주세요.
+        return;
       }
     } else {
       // 그 외 경우 전체 필수항목 유효성 체크
       if (!recipeForm.recipeTtl.trim()) {
-        return toast.error("제목을 입력해 주세요.");
+        gfnToast("valid.require.input", ["제목"]); // {0}을(를) 입력해 주세요.
+        return;
       }
       if (!recipeForm.dishNm.trim()) {
-        return toast.error("요리명을 입력해 주세요.");
+        gfnToast("valid.require.input", ["요리명"]); // {0}을(를) 입력해 주세요.
+        return;
       }
       if (!recipeForm.categoryCd) {
-        return toast.error("카테고리를 선택해 주세요.");
+        gfnToast("valid.require.select", ["카테고리"]); // {0}을(를) 선택해 주세요.
+        return;
       }
       if (!recipeForm.recipeDifficultCd) {
-        return toast.error("난이도를 선택해 주세요.");
+        gfnToast("valid.require.select", ["난이도"]); // {0}을(를) 선택해 주세요.
+        return;
       }
       if (!recipeForm.cookingTime) {
-        return toast.error("조리 시간을 입력해 주세요.");
+        gfnToast("valid.require.input", ["조리 시간"]); // {0}을(를) 입력해 주세요.
+        return;
       }
       if (!mainImage.file && !mainImage.previewUrl) {
-        return toast.error("대표 이미지를 등록해 주세요.");
+        gfnToast("valid.require.regist", ["대표 이미지"]); // {0}을(를) 등록해 주세요.
+        return;
       }
     }
 
@@ -369,10 +376,12 @@ export function useRecipeForm() {
     // 작성완료 시 최소 1개 입력 검증
     if (finalStatusCd !== "01") {
       if (validIngredients.length === 0) {
-        return toast.error("최소 1개의 재료 정보를 입력해 주세요.");
+        gfnToast("valid.require.input.min.count", ["1", "재료 정보"]); // 최소 {0}개의 {1}을(를) 입력해 주세요.
+        return;
       }
       if (validSteps.length === 0) {
-        return toast.error("최소 1개의 조리 순서를 입력해 주세요.");
+        gfnToast("valid.require.input.min.count", ["1", "조리 순서"]); // 최소 {0}개의 {1}을(를) 입력해 주세요.
+        return;
       }
     }
 
@@ -420,16 +429,16 @@ export function useRecipeForm() {
       let responseId = recipeId;
       if (isEditMode) {
         await updateRecipeInfo(formData);
-        toast.success("레시피가 성공적으로 수정되었습니다.");
+        gfnToast("common.success.modify", ["레시피"]); // {0}이(가) 성공적으로 수정되었습니다.
       } else {
         responseId = await insertRecipeInfo(formData);
-        toast.success("레시피가 성공적으로 등록되었습니다.");
+        gfnToast("common.success.regist", ["레시피"]); // {0}이(가) 성공적으로 등록되었습니다.
       }
 
       navigate(`/recipes/detail/${responseId}`);
     } catch (error) {
       console.error("레시피 저장 실패:", error);
-      toast.error("레시피 저장에 실패했습니다. 입력값을 확인해주세요.");
+      gfnToast("common.fail.save", ["레시피"]); // {0} 저장에 실패했습니다. 입력값을 확인해주세요.
     } finally {
       setLoading(false);
     }

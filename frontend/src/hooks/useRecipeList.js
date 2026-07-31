@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { selectRecipeInfoList } from "../api/recipeApi";
 import useCodeStore from "../stores/useCodeStore";
-import toast from "react-hot-toast";
+import { gfnToast } from "../utils/toastUtils";
 
 // 초기 상태 상수
 const INITIAL_FORM_STATE = {
@@ -126,7 +126,7 @@ export function useRecipeList() {
 
     } catch (error) {
       console.error("레시피 목록 로드 실패:", error);
-      toast.error("데이터를 불러오는 데 실패했습니다.");
+      gfnToast("common.fail.load", ["데이터"]); // {0}을(를) 불러오는 데 실패했습니다.
       setPageData((prev) => ({ ...prev, loading: false }));
     }
   };

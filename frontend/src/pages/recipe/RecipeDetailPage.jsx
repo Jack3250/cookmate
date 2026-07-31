@@ -2,7 +2,8 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { retrieveRecipeInfo, deleteRecipeInfo, toggleRecipeLike } from '../../api/recipeApi';
 import useCodeStore from '../../stores/useCodeStore';
-import toast from 'react-hot-toast';
+import { gfnToast } from '../../utils/toastUtils';
+import { gfnConfirm } from '../../utils/confirmUtils';
 import RecipeHeader from '../../components/recipe/RecipeHeader';
 import IngredientList from '../../components/recipe/IngredientList';
 import StepList from '../../components/recipe/StepList';
@@ -43,7 +44,7 @@ function RecipeDetailPage() {
       setRecipe(data);
     } catch (error) {
       console.error('레시피 상세 조회 실패:', error);
-      toast.error('레시피 정보를 불러오는 데 실패했습니다.');
+      gfnToast('common.fail.load', ['레시피 정보']); // {0}을(를) 불러오는 데 실패했습니다.
       navigate(-1); // 이전 페이지로 돌아감
     } finally {
       setLoading(false);
@@ -61,14 +62,14 @@ function RecipeDetailPage() {
    * 레시피 삭제 처리 함수
    */
   const handleDelete = async () => {
-    if (window.confirm('정말로 이 레시피를 삭제하시겠습니까?')) {
+    if (await gfnConfirm('confirm.delete', ['레시피'])) { // 정말로 이 {0}를 삭제하시겠습니까?
       try {
         await deleteRecipeInfo(recipeId);
-        toast.success('레시피가 성공적으로 삭제되었습니다.');
+        gfnToast('common.success.delete', ['레시피']); // {0}이(가) 성공적으로 삭제되었습니다.
         navigate(-1); // 이전 페이지로 돌아감
       } catch (error) {
         console.error('레시피 삭제 실패:', error);
-        toast.error('레시피 삭제에 실패했습니다.');
+        gfnToast('common.fail.delete', ['레시피']); // {0} 삭제에 실패했습니다.
       }
     }
   };
@@ -102,7 +103,7 @@ function RecipeDetailPage() {
       if (clicks % 2 !== 0) {
         try {
           const serverStatus = await toggleRecipeLike(recipeId);
-          
+
           // 안전장치: 서버 상태와 프론트 상태가 다르면 동기화
           setRecipe(prev => {
             if (prev.isLiked !== serverStatus) {
@@ -116,13 +117,13 @@ function RecipeDetailPage() {
           });
 
           if (serverStatus) {
-            toast.success('이 레시피를 좋아합니다!');
+            gfnToast('like.success', ['레시피']); // 이 {0}를 좋아합니다!
           }
         } catch (error) {
           if (error.response && error.response.status === 401) {
-            toast.error('로그인이 필요한 기능입니다.');
+            gfnToast('auth.login.required'); // 로그인이 필요한 서비스입니다.
           } else {
-            toast.error('좋아요 처리 중 오류가 발생했습니다.');
+            gfnToast('sys.process.error', ['좋아요']); // {0} 처리 중 오류가 발생했습니다.
             console.error('좋아요 에러:', error);
           }
           // 에러 발생 시 UI 롤백
@@ -222,11 +223,11 @@ function RecipeDetailPage() {
 
       {/* 좋아요 및 소셜 액션 버튼 영역 */}
       <div className="flex justify-center items-center mt-12 mb-4 border-t border-gray-200 dark:border-zinc-700 pt-10">
-        <LikeButton 
-          isLiked={recipe.isLiked} 
-          likeCnt={recipe.likeCnt} 
-          onClick={handleLikeClick} 
-          size="lg" 
+        <LikeButton
+          isLiked={recipe.isLiked}
+          likeCnt={recipe.likeCnt}
+          onClick={handleLikeClick}
+          size="lg"
         />
       </div>
 
