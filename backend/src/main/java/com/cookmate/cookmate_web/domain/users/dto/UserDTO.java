@@ -82,6 +82,34 @@ public class UserDTO {
         private boolean keepLoggedIn; // 로그인 상태 유지 여부
     }
 
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class FindIdRequest { // 아이디 찾기 요청 데이터
+        @NotBlank(message = "{valid.user.nm.required}")
+        private String userNm;
+
+        @NotBlank(message = "{valid.user.email.required}")
+        @Email(message = "{valid.user.email.format}")
+        private String email;
+    }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class FindPwRequest { // 비밀번호 찾기 요청 데이터
+        @NotBlank(message = "{valid.user.id.required}")
+        private String loginId;
+
+        @NotBlank(message = "{valid.user.email.required}")
+        @Email(message = "{valid.user.email.format}")
+        private String email;
+        
+        private String encPswd; // 임시 비밀번호 암호화 저장용
+    }
+
     @NoArgsConstructor
     @AllArgsConstructor
     @Getter

@@ -9,6 +9,7 @@ import LoginPage from "../pages/user/LoginPage";
 import TermsPage from "../pages/user/TermsPage";
 import RegisterFormPage from "../pages/user/RegisterFormPage";
 import RegisterComplete from "../pages/user/RegisterComplete";
+import FindAccountPage from "../pages/user/FindAccountPage";
 
 import RecipeListPage from "../pages/recipe/RecipeListPage";
 import RecipeFormPage from "../pages/recipe/RecipeFormPage";
@@ -56,6 +57,9 @@ function AppRouter() {
 
       {/* 로그인 */}
       <Route path="/login" element={<LoginPage />} />
+
+      {/* 계정 찾기 */}
+      <Route path="/find-account" element={<FindAccountPage />} />
 
       {/* 회원가입 */}
       <Route path="/join">

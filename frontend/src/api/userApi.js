@@ -77,3 +77,23 @@ export const getMeApi = async () => {
   const response = await client.get('/users/me');
   return response.data;
 };
+
+/**
+ * 아이디 찾기 API
+ * @param {Object} data { userNm, email }
+ * @return {Promise<String>} 마스킹된 아이디
+ */
+export const findIdApi = async (data) => {
+  const response = await client.post('/users/find-id', data);
+  return response.data;
+};
+
+/**
+ * 비밀번호 찾기 (임시 발급) API
+ * @param {Object} data { loginId, email }
+ * @return {Promise<String>} 임시 발급된 비밀번호
+ */
+export const findPwApi = async (data) => {
+  const response = await client.post('/users/find-pw', data);
+  return response.data;
+};

@@ -40,6 +40,26 @@ public interface UserMapper {
 
     /*
      * =======================
+     * 계정 찾기 (아이디/비밀번호)
+     * =======================
+     */
+
+    /**
+     * 아이디 찾기 (이름, 이메일로 조회)
+     * @param request FindIdRequest DTO
+     * @return 로그인 아이디 (존재하지 않으면 null)
+     */
+    String selectLoginIdByNameAndEmail(UserDTO.FindIdRequest request);
+
+    /**
+     * 비밀번호 업데이트 (임시 비밀번호 발급용)
+     * @param request FindPwRequest DTO (loginId, encPswd)
+     * @return 업데이트된 행의 수
+     */
+    int updateTemporaryPassword(UserDTO.FindPwRequest request);
+
+    /*
+     * =======================
      * 헬퍼 메소드
      * =======================
      */

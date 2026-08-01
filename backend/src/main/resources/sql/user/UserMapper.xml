@@ -87,4 +87,26 @@
         WHERE NICKNAME = #{nickname}
           AND DEL_YN = 'N'
     </select>
+
+    <!--
+    =======================
+    계정 찾기
+    =======================
+    -->
+    <select id="selectLoginIdByNameAndEmail" parameterType="com.cookmate.cookmate_web.domain.users.dto.UserDTO$FindIdRequest" resultType="string">
+        /* UserMapper.selectLoginIdByNameAndEmail : 아이디 찾기 */
+        SELECT LOGIN_ID
+        FROM USERS
+        WHERE USER_NM = #{userNm}
+          AND EMAIL = #{email}
+          AND DEL_YN = 'N'
+    </select>
+
+    <update id="updateTemporaryPassword" parameterType="com.cookmate.cookmate_web.domain.users.dto.UserDTO$FindPwRequest">
+        /* UserMapper.updateTemporaryPassword : 임시 비밀번호 발급 업데이트 */
+        UPDATE USERS
+        SET PSWD = #{encPswd}
+        WHERE LOGIN_ID = #{loginId}
+          AND DEL_YN = 'N'
+    </update>
 </mapper>

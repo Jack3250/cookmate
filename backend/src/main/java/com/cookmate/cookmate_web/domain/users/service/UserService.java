@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import com.cookmate.cookmate_web.domain.file.service.FileService;
 import java.util.Collections;
+import java.util.UUID;
 
 /**
  * @file        UserService.java
@@ -90,6 +91,54 @@ public class UserService {
         httpSession.setAttribute("USER_SESSION", new SessionUser(user));
 
         return user;
+    }
+
+    /*
+     * =======================
+     * 계정 찾기 (아이디/비밀번호)
+     * =======================
+     */
+    /**
+     * 아이디 찾기
+     * @param request 이름, 이메일
+     * @return 마스킹 처리된 아이디
+     */
+    public String findLoginId(UserDTO.FindIdRequest request) {
+        String loginId = userMapper.selectLoginIdByNameAndEmail(request);
+        if (loginId == null) {
+            throw new CustomException(ErrorCode.USER_NOT_FOUND);
+        }
+        
+        // 아이디 마스킹 처리 (예: abcdef -> abc***)
+        if (loginId.length() <= 3) {
+            return loginId.substring(0, 1) + "***";
+        }
+        return loginId.substring(0, 3) + "*".repeat(loginId.length() - 3);
+    }
+
+    /**
+     * 비밀번호 찾기 (임시 비밀번호 발급)
+     * @param request 아이디, 이메일
+     * @return 발급된 임시 비밀번호 (평문)
+     */
+    @Transactional
+    public String resetPassword(UserDTO.FindPwRequest request) {
+        // 해당 유저가 존재하는지 검증
+        UserDTO.UserInfo user = userMapper.selectUserInfo(request.getLoginId());
+        if (user == null || !user.getEmail().equals(request.getEmail())) {
+            throw new CustomException(ErrorCode.USER_NOT_FOUND);
+        }
+
+        // 임시 비밀번호 생성 (8자리 무작위 영문+숫자)
+        String tempPassword = UUID.randomUUID().toString().replace("-", "").substring(0, 8) + "!";
+        
+        // 암호화 후 DB 업데이트
+        String encPswd = passwordEncoder.encode(tempPassword);
+        request.setEncPswd(encPswd);
+        
+        userMapper.updateTemporaryPassword(request);
+
+        return tempPassword;
     }
 
     /*

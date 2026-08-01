@@ -146,4 +146,27 @@ public class UserController {
         }
         return ResponseEntity.ok(user);
     }
+
+    /*
+     * =======================
+     * 계정 찾기
+     * =======================
+     */
+    /**
+     * 아이디 찾기
+     */
+    @PostMapping("/find-id")
+    public ResponseEntity<String> findId(@Valid @RequestBody UserDTO.FindIdRequest request) {
+        String maskedId = userService.findLoginId(request);
+        return ResponseEntity.ok(maskedId);
+    }
+
+    /**
+     * 비밀번호 찾기 (임시 발급)
+     */
+    @PostMapping("/find-pw")
+    public ResponseEntity<String> findPw(@Valid @RequestBody UserDTO.FindPwRequest request) {
+        String tempPw = userService.resetPassword(request);
+        return ResponseEntity.ok(tempPw);
+    }
 }
