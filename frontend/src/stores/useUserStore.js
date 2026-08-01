@@ -30,7 +30,9 @@ const useUserStore = create(
     }),
     {
       name: 'user-storage', // LocalStorage에 저장될 키 이름
-      storage: createJSONStorage(() => localStorage), // 저장소 지정 (기본값이라 생략 가능하지만 명시함)
+      storage: createJSONStorage(() => localStorage), // 저장소 지정
+      // 세션 관련 데이터는 스토리지에 저장하지 않고 오직 theme만 저장하도록 분리
+      partialize: (state) => ({ theme: state.theme }), 
     }
   )
 );

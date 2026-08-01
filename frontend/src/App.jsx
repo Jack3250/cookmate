@@ -6,10 +6,26 @@ import React, { useEffect } from 'react';
 import { useMessageStore } from './stores/useMessageStore';
 import useUserStore from './stores/useUserStore';
 import ConfirmModal from './components/common/ConfirmModal';
+import { getMeApi } from './api/userApi';
 
 function App() {
   const loadMessages = useMessageStore(state => state.loadMessages);
   const theme = useUserStore(state => state.theme);
+  const login = useUserStore(state => state.login);
+  const logout = useUserStore(state => state.logout);
+
+  // 앱 로드 시 세션 복구 (Hydration)
+  useEffect(() => {
+    const restoreSession = async () => {
+      try {
+        const userData = await getMeApi();
+        login(userData); // 쿠키가 살아있다면 스토어 복구
+      } catch (error) {
+        logout(); // 쿠키가 없거나 만료되었다면 로그아웃 처리
+      }
+    };
+    restoreSession();
+  }, []);
 
   useEffect(() => {
     loadMessages();

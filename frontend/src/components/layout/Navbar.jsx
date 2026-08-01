@@ -2,13 +2,28 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 import useUserStore from '../../stores/useUserStore';
+import { logoutApi } from '../../api/userApi';
+import { gfnToast } from '../../utils/toastUtils';
 
 function Navbar() {
   const navigate = useNavigate();
 
-  // 다크모드 토글 (스토어 연동)
-  const toggleTheme = useUserStore((state) => state.toggleTheme);
+  // 다크모드/로그인 상태 가져오기
   const theme = useUserStore((state) => state.theme);
+  const toggleTheme = useUserStore((state) => state.toggleTheme);
+  const isLoggedIn = useUserStore((state) => state.isLoggedIn);
+  const logoutStore = useUserStore((state) => state.logout);
+  
+  const handleLogout = async () => {
+    try {
+      await logoutApi();
+      logoutStore();
+      gfnToast("logout.success"); 
+      navigate("/main");
+    } catch (error) {
+      console.error("로그아웃 실패:", error);
+    }
+  };
 
   return (
     <nav className="bg-surface-light dark:bg-surface-dark border-b border-border-light dark:border-border-dark h-10 flex items-center justify-between px-4 text-xs lg:px-8">
@@ -27,7 +42,16 @@ function Navbar() {
           <span className="material-icons text-sm">{theme === 'light' ? 'dark_mode' : 'light_mode'}</span>
         </button>
         <span className="text-gray-400">|</span>
-        <Link className="hover:text-primary transition-colors" to="/login">로그인</Link>
+        
+        {isLoggedIn ? (
+          <>
+            <Link className="hover:text-primary transition-colors" to="/mypage">내정보</Link>
+            <span className="text-gray-400">|</span>
+            <button className="hover:text-primary transition-colors" onClick={handleLogout}>로그아웃</button>
+          </>
+        ) : (
+          <Link className="hover:text-primary transition-colors" to="/login">로그인</Link>
+        )}
       </div>
     </nav>
   );

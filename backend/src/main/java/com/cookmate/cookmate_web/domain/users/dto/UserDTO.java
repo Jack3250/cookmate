@@ -1,5 +1,6 @@
 package com.cookmate.cookmate_web.domain.users.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -77,6 +78,8 @@ public class UserDTO {
 
         @NotBlank(message = "{valid.user.pswd.required}")
         private String pswd;
+        
+        private boolean keepLoggedIn; // 로그인 상태 유지 여부
     }
 
     @NoArgsConstructor
@@ -85,7 +88,10 @@ public class UserDTO {
     @Builder
     public static class UserInfo { // 회원 정보 응답 데이터
         private String userKey;
+        
+        @JsonIgnore
         private String pswd;
+        
         private String loginId;
         private String userNm;
         private String nickname;

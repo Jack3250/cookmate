@@ -60,11 +60,20 @@ export const checkNicknameApi = async (nickname) => {
 /**
  * 이메일 중복 확인 API
  * @param {string} email 확인할 이메일
- * @returns {Promise<boolean>} 사용 가능 여부
+ * @return {Promise<boolean>} 사용 가능 여부
  */
 export const checkEmailApi = async (email) => {
   const response = await client.get('/users/check-email', {
     params: { email },
   });
   return response.data;
-};
+};
+
+/**
+ * 내 정보 조회 API (세션 복구용)
+ * @return {Promise<Object>} 현재 로그인된 유저 정보
+ */
+export const getMeApi = async () => {
+  const response = await client.get('/users/me');
+  return response.data;
+};

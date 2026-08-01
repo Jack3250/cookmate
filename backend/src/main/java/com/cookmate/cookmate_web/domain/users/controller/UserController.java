@@ -9,6 +9,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.http.MediaType;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import com.cookmate.cookmate_web.domain.users.dto.SessionUser;
 
 /**
  * @file        UserController.java
@@ -82,12 +86,31 @@ public class UserController {
 
     /**
      * 로그인
-     * @param loginRequest 아이디, 비밀번호
+     * @param loginRequest 아이디, 비밀번호 및 유지 여부
      * @return 로그인 회원 정보
      */
     @PostMapping("/login")
-    public ResponseEntity<UserDTO.UserInfo> login(@Valid @RequestBody UserDTO.LoginRequest loginRequest) {
+    public ResponseEntity<UserDTO.UserInfo> login(
+            @Valid @RequestBody UserDTO.LoginRequest loginRequest, 
+            HttpServletRequest request, 
+            HttpServletResponse response) {
+        
         UserDTO.UserInfo userInfo = userService.login(loginRequest);
+        HttpSession session = request.getSession(false);
+        
+        // 로그인 상태 유지 처리 (JSESSIONID 쿠키 수명 연장)
+        if (session != null) {
+            Cookie cookie = new Cookie("JSESSIONID", session.getId());
+            cookie.setPath("/");
+            if (loginRequest.isKeepLoggedIn()) {
+                cookie.setMaxAge(60 * 60 * 24 * 30); // 30일 (초 단위)
+                session.setMaxInactiveInterval(60 * 60 * 24 * 30); // 서버 세션 만료도 30일로 연장
+            } else {
+                cookie.setMaxAge(-1); // 브라우저 종료 시 소멸
+            }
+            response.addCookie(cookie);
+        }
+
         return ResponseEntity.ok(userInfo);
     }
 
@@ -97,9 +120,30 @@ public class UserController {
      * @return ok 응답상태
      */
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(HttpSession session) {
-        session.invalidate(); // 세션 삭제
+    public ResponseEntity<Void> logout(HttpServletRequest request, HttpServletResponse response) {
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            session.invalidate(); // 세션 무효화
+        }
+        
+        // JSESSIONID 쿠키 삭제
+        Cookie cookie = new Cookie("JSESSIONID", null);
+        cookie.setPath("/");
+        cookie.setMaxAge(0);
+        response.addCookie(cookie);
+        
         return ResponseEntity.ok().build();
     }
 
+    /**
+     * 내 정보 조회 (새로고침 시 세션 복구용)
+     */
+    @GetMapping("/me")
+    public ResponseEntity<SessionUser> getMe(HttpSession session) {
+        SessionUser user = (SessionUser) session.getAttribute("USER_SESSION");
+        if (user == null) {
+            return ResponseEntity.status(401).build();
+        }
+        return ResponseEntity.ok(user);
+    }
 }
