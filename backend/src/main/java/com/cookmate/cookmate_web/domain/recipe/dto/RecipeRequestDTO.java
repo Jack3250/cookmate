@@ -50,6 +50,7 @@ public class RecipeRequestDTO {
         private String openYn;             // 공개 여부
         private String fileGrpId;          // 파일 그룹 ID
         private String rgtrKey;            // 등록자 키
+        private String mdfrKey;            // 수정자 키
 
         private List<String> deleteFileIds;   // 삭제 파일 ID
 
@@ -80,5 +81,17 @@ public class RecipeRequestDTO {
         private String fileGrpId; // 파일 그룹 ID
 
         private List<String> deleteFileIds; // 삭제 파일 ID
+    }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class HashtagDTO {
+        private String hstgId;
+        private String tagNm;
+        private String rgtrKey;
+        private Long recipeSeq;
+        private Long hstgSeq;
     }
 }

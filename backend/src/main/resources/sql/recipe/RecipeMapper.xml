@@ -119,14 +119,16 @@
           , RECIPE_STATUS       = #{recipeStatus}
           , OPEN_YN             = #{openYn}
           , FILE_GRP_ID         = #{fileGrpId}
+          , MDFR_KEY            = #{mdfrKey}
           , MDFCN_DT            = CURRENT_TIMESTAMP
         WHERE RECIPE_SEQ = #{recipeSeq}
     </update>
 
-    <update id="deleteRecipeInfo" parameterType="string">
+    <update id="deleteRecipeInfo" parameterType="com.cookmate.cookmate_web.domain.recipe.dto.RecipeRequestDTO$Recipe">
         /* RecipeMapper.deleteRecipeInfo : 레시피 정보 삭제 */
         UPDATE RECIPE
            SET DEL_YN   = 'Y'
+             , MDFR_KEY = #{mdfrKey}
              , MDFCN_DT = CURRENT_TIMESTAMP
          WHERE RECIPE_ID = #{recipeId}
     </update>
@@ -201,10 +203,10 @@
           AND DEL_YN = 'N'
     </select>
 
-    <insert id="insertHashtag" parameterType="map">
+    <insert id="insertHashtag" parameterType="com.cookmate.cookmate_web.domain.recipe.dto.RecipeRequestDTO$HashtagDTO">
         /* RecipeMapper.insertHashtag : 해시태그 마스터 등록 */
         INSERT INTO HASHTAG (HSTG_ID, HSTG_NM, RGTR_KEY)
-        VALUES (#{hstgId}, #{tagNm}, 'admin')
+        VALUES (#{hstgId}, #{tagNm}, #{rgtrKey})
         ON CONFLICT (HSTG_NM) DO NOTHING
     </insert>
 
@@ -219,7 +221,7 @@
           AND H.DEL_YN = 'N'
     </select>
 
-    <insert id="insertRecipeHashtag" parameterType="map">
+    <insert id="insertRecipeHashtag" parameterType="com.cookmate.cookmate_web.domain.recipe.dto.RecipeRequestDTO$HashtagDTO">
         /* RecipeMapper.insertRecipeHashtag : 레시피 해시태그 매핑 등록 */
         INSERT INTO RECIPE_HASHTAG (RECIPE_SEQ, HSTG_SEQ)
         VALUES (#{recipeSeq}, #{hstgSeq})
@@ -249,7 +251,7 @@
                END AS LIKE_STATUS
         FROM LIKES
         WHERE TGT_SEQ = #{tgtSeq}
-          AND USER_SEQ = (SELECT USER_SEQ FROM USERS WHERE LOGIN_ID = #{loginId} AND DEL_YN = 'N')
+          AND USER_SEQ = (SELECT USER_SEQ FROM USERS WHERE USER_KEY = #{userKey} AND DEL_YN = 'N')
           AND TGT_TY = #{tgtTy}
     </select>
 
@@ -259,7 +261,7 @@
         /* RecipeMapper.upsertLike : 좋아요 등록/수정 (UPSERT) */
         INSERT INTO LIKES (TGT_SEQ, USER_SEQ, TGT_TY, CRET_DT, DEL_YN)
         VALUES ( #{tgtSeq}
-               , (SELECT USER_SEQ FROM USERS WHERE LOGIN_ID = #{loginId} AND DEL_YN = 'N')
+               , (SELECT USER_SEQ FROM USERS WHERE USER_KEY = #{userKey} AND DEL_YN = 'N')
                , #{tgtTy}
                , CURRENT_TIMESTAMP
                , 'N')

@@ -59,9 +59,9 @@ public interface RecipeMapper {
 
     /**
      * 레시피 정보 삭제
-     * @param recipeId 레시피 ID
+     * @param recipe 레시피 ID, 수정자 키
      */
-    void deleteRecipeInfo(String recipeId);
+    void deleteRecipeInfo(RecipeRequestDTO.Recipe recipe);
 
     /*
     ======================
@@ -125,9 +125,9 @@ public interface RecipeMapper {
 
     /**
      * 해시태그 등록 (존재하면 무시)
-     * @param tagNm 해시태그명
+     * @param hashTagInfo 해시태그 정보
      */
-    void insertHashtag(@Param("hstgId") String hstgId, @Param("tagNm") String tagNm);
+    void insertHashtag(RecipeRequestDTO.HashtagDTO hashTagInfo);
 
     /**
      * 레시피 해시태그 목록 조회
@@ -137,11 +137,10 @@ public interface RecipeMapper {
     List<String> selectRecipeHashtags(Long recipeSeq);
 
     /**
-     * 레시피 해시태그 매핑 등록
-     * @param recipeSeq 레시피 시퀀스
-     * @param hstgSeq 해시태그 시퀀스
+     * 레시피-해시태그 매핑 등록
+     * @param hashTagInfo 레시피 일련번호, 해시태그 일련번호 (recipeSeq, hstgSeq)
      */
-    void insertRecipeHashtag(@Param("recipeSeq") Long recipeSeq, @Param("hstgSeq") Long hstgSeq);
+    void insertRecipeHashtag(RecipeRequestDTO.HashtagDTO hashTagInfo);
 
     /**
      * 레시피 해시태그 매핑 전체 삭제

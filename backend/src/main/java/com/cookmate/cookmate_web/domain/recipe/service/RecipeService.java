@@ -86,11 +86,11 @@ public class RecipeService {
     /**
      * 레시피 정보 상세 조회
      * @param recipeId 레시피 ID
-     * @param loginId 유저 아이디
+     * @param userKey 유저 키
      * @return 레시피 상세 정보
      */
     @Transactional(readOnly = true)
-    public RecipeResponseDTO.Detail retrieveRecipeInfo(String recipeId, String loginId) {
+    public RecipeResponseDTO.Detail retrieveRecipeInfo(String recipeId, String userKey) {
         // 레시피 정보 상세 조회
         RecipeResponseDTO.Detail recipe = recipeMapper.retrieveRecipeInfo(recipeId);
         if (recipe == null) {
@@ -118,11 +118,11 @@ public class RecipeService {
         recipe.setHashtags(hashtags);
 
         // 사용자 좋아요 여부 체크
-        if (loginId != null) {
+        if (userKey != null) {
             LikeDTO.Request likeRequest = LikeDTO.Request.builder()
                     .tgtSeq(recipe.getRecipeSeq())
                     .tgtTy("RECIPE")
-                    .loginId(loginId)
+                    .userKey(userKey)
                     .build();
             LikeDTO.Response likeResponse = recipeMapper.checkUserLike(likeRequest);
             Integer likeStatus = (likeResponse != null) ? likeResponse.getLikeStatus() : 0;
@@ -136,29 +136,27 @@ public class RecipeService {
 
     /**
      * 레시피 정보 등록
-     * @param loginId       로그인 ID
+     * @param userKey       로그인 유저 키
      * @param recipe       저장 요청 데이터
      * @param mainImage     메인 사진
      * @param stepImagesMap 단계별 사진 목록
      * @return 레시피 ID
      */
     @Transactional
-    public String insertRecipeInfo(String loginId,
+    public String insertRecipeInfo(String userKey,
                                    RecipeRequestDTO.Recipe recipe,
                                    List<MultipartFile> mainImage,
                                    Map<Integer, List<MultipartFile>> stepImagesMap) {
-        String rgtrKey = "testuserkey";
-
         // 파일 저장
         String mainFileGrpId = null;
         if (mainImage != null && !mainImage.isEmpty()) {
-            mainFileGrpId = fileService.saveFile(mainImage, null, rgtrKey);
+            mainFileGrpId = fileService.saveFile(mainImage, null, userKey);
         }
 
         String recipeId = KeygenUtil.generateKey();
         recipe.setRecipeId(recipeId);
         recipe.setFileGrpId(mainFileGrpId);
-        recipe.setRgtrKey(rgtrKey);
+        recipe.setRgtrKey(userKey);
 
         // 레시피 정보 등록
         recipeMapper.insertRecipeInfo(recipe);
@@ -166,22 +164,22 @@ public class RecipeService {
 
         // 레시피 재료, 단계 정보 등록
         insertRecipeIngredient(recipe, recipeSeq);
-        insertRecipeSteps(recipe, stepImagesMap, rgtrKey, recipeSeq);
-        insertRecipeHashtags(recipe.getHashtags(), recipeSeq);
+        insertRecipeSteps(recipe, stepImagesMap, userKey, recipeSeq);
+        insertRecipeHashtags(recipe.getHashtags(), recipeSeq, userKey);
 
         return recipeId;
     }
 
     /**
      * 레시피 정보 수정
-     * @param loginId       로그인 ID
+     * @param userKey       로그인 유저 키
      * @param request       수정 요청 데이터
      * @param mainImages    메인 사진
      * @param stepImagesMap 단계별 사진 목록
      * @return 레시피 ID
      */
     @Transactional
-    public Long updateRecipeInfo(String loginId,
+    public Long updateRecipeInfo(String userKey,
                                  RecipeRequestDTO.Recipe request,
                                  List<MultipartFile> mainImages,
                                  Map<Integer, List<MultipartFile>> stepImagesMap) {
@@ -193,16 +191,16 @@ public class RecipeService {
         Long recipeSeq = recipe.getRecipeSeq();
         request.setRecipeSeq(recipeSeq);
 
-        String mdfrKey = "testuserkey";
+        request.setMdfrKey(userKey);
 
         String mainFileGrpId = request.getFileGrpId();
 
         if (mainFileGrpId != null) {
             // 기존 파일이 있을 경우 수정
-            fileService.updateFiles(mainFileGrpId, mainImages, request.getDeleteFileIds(), mdfrKey);
+            fileService.updateFiles(mainFileGrpId, mainImages, request.getDeleteFileIds(), userKey);
         } else if (mainImages != null && !mainImages.isEmpty()) {
             // 기존 파일이 없을 경우 신규 파일 저장
-            mainFileGrpId = fileService.saveFile(mainImages, null, mdfrKey);
+            mainFileGrpId = fileService.saveFile(mainImages, null, userKey);
         }
         request.setFileGrpId(mainFileGrpId);
 
@@ -212,8 +210,8 @@ public class RecipeService {
 
         // 레시피 재료, 단계, 해시태그 정보 등록
         insertRecipeIngredient(request, recipeSeq);
-        insertRecipeSteps(request, stepImagesMap, mdfrKey, recipeSeq);
-        insertRecipeHashtags(request.getHashtags(), recipeSeq);
+        insertRecipeSteps(request, stepImagesMap, userKey, recipeSeq);
+        insertRecipeHashtags(request.getHashtags(), recipeSeq, userKey);
 
         return recipe.getRecipeSeq();
     }
@@ -221,10 +219,10 @@ public class RecipeService {
     /**
      * 레시피 정보 삭제
      * @param recipeId 레시피 ID
-     * @param loginId  로그인 ID
+     * @param userKey  로그인 유저 키
      */
     @Transactional
-    public void deleteRecipeInfo(String recipeId, String loginId) {
+    public void deleteRecipeInfo(String recipeId, String userKey) {
         // 레시피 정보 상세 조회
         RecipeResponseDTO.Detail recipe = recipeMapper.retrieveRecipeInfo(recipeId);
         if (recipe == null) {
@@ -235,8 +233,13 @@ public class RecipeService {
         recipeMapper.deleteRecipeIngredientList(recipe.getRecipeSeq());
         recipeMapper.deleteRecipeStepList(recipe.getRecipeSeq());
 
+        // 수정자 키 세팅
+        RecipeRequestDTO.Recipe deleteReq = new RecipeRequestDTO.Recipe();
+        deleteReq.setRecipeId(recipeId);
+        deleteReq.setMdfrKey(userKey);
+
         // 레시피 정보 삭제
-        recipeMapper.deleteRecipeInfo(recipeId);
+        recipeMapper.deleteRecipeInfo(deleteReq);
     }
 
     /*
@@ -247,11 +250,11 @@ public class RecipeService {
     /**
      * 레시피 좋아요 토글
      * @param recipeId 레시피 ID
-     * @param loginId 유저 아이디
+     * @param userKey 유저 키
      * @return 현재 좋아요 상태 (true: 좋아요 상태, false: 취소 상태)
      */
     @Transactional
-    public boolean toggleRecipeLike(String recipeId, String loginId) {
+    public boolean toggleRecipeLike(String recipeId, String userKey) {
         RecipeResponseDTO.Detail recipe = recipeMapper.retrieveRecipeInfo(recipeId);
         if (recipe == null) {
             throw new CustomException(ErrorCode.RECIPE_NOT_FOUND);
@@ -260,7 +263,7 @@ public class RecipeService {
         LikeDTO.Request likeRequest = LikeDTO.Request.builder()
                 .tgtSeq(recipe.getRecipeSeq())
                 .tgtTy("RECIPE")
-                .loginId(loginId)
+                .userKey(userKey)
                 .build();
 
         LikeDTO.Response response = recipeMapper.upsertLike(likeRequest);
@@ -324,8 +327,9 @@ public class RecipeService {
      * 레시피 해시태그 정보 등록
      * @param hashtags  해시태그 목록
      * @param recipeSeq 레시피 시퀀스
+     * @param userKey   수정자/등록자 키
      */
-    private void insertRecipeHashtags(List<String> hashtags, Long recipeSeq) {
+    private void insertRecipeHashtags(List<String> hashtags, Long recipeSeq, String userKey) {
         recipeMapper.deleteRecipeHashtags(recipeSeq); // 기존 매핑 삭제
         if (hashtags == null || hashtags.isEmpty()) {
             return;
@@ -333,13 +337,19 @@ public class RecipeService {
 
         for (String tag : hashtags) {
             // 해시태그가 기존에 존재하면 무시, 없으면 생성
-            recipeMapper.insertHashtag(KeygenUtil.generateKey(), tag);
+            RecipeRequestDTO.HashtagDTO hashTagInfo = new RecipeRequestDTO.HashtagDTO();
+            hashTagInfo.setHstgId(KeygenUtil.generateKey());
+            hashTagInfo.setTagNm(tag);
+            hashTagInfo.setRgtrKey(userKey);
+            recipeMapper.insertHashtag(hashTagInfo);
 
             // 해시태그명으로 시퀀스 조회
             Long hstgSeq = recipeMapper.selectHashtagSeqByName(tag);
             if (hstgSeq != null) {
                 // 레시피 해시태그 매핑 등록
-                recipeMapper.insertRecipeHashtag(recipeSeq, hstgSeq);
+                hashTagInfo.setRecipeSeq(recipeSeq);
+                hashTagInfo.setHstgSeq(hstgSeq);
+                recipeMapper.insertRecipeHashtag(hashTagInfo);
             }
         }
     }

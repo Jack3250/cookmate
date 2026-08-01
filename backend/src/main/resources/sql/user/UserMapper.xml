@@ -106,6 +106,8 @@
         /* UserMapper.updateTemporaryPassword : 임시 비밀번호 발급 업데이트 */
         UPDATE USERS
         SET PSWD = #{encPswd}
+          , MDFR_KEY = 'FIND_PSWD'
+          , MDFCN_DT = CURRENT_TIMESTAMP
         WHERE LOGIN_ID = #{loginId}
           AND DEL_YN = 'N'
     </update>

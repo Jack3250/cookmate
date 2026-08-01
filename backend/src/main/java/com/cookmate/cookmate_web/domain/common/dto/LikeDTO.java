@@ -29,7 +29,7 @@ public class LikeDTO {
     public static class Request {
         private Long tgtSeq;
         private String tgtTy;
-        private String loginId;
+        private String userKey;
         private String delYn;
     }
 
