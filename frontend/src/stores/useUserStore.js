@@ -9,6 +9,7 @@ const useUserStore = create(
       // 상태 (State) - 변수들
       user: null,          // 유저 정보 객체
       isLoggedIn: false,   // 로그인 여부
+      isInitialized: false,// 앱 실행 시 세션 복원(확인) 완료 여부
       theme: 'light',      // 다크모드 여부
 
       // 액션 (Actions) - 상태를 변경하는 함수들
@@ -17,6 +18,9 @@ const useUserStore = create(
       
       // 로그아웃: 정보를 싹 비움
       logout: () => set({ user: null, isLoggedIn: false }),
+      
+      // 세션 확인 완료 상태로 변경
+      setInitialized: (status) => set({ isInitialized: status }),
       
       // 닉네임 변경 (기존 user 객체를 유지하면서 이름만 바꿈)
       updateNickname: (newNickname) => set((state) => ({

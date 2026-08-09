@@ -13,6 +13,7 @@ function App() {
   const theme = useUserStore(state => state.theme);
   const login = useUserStore(state => state.login);
   const logout = useUserStore(state => state.logout);
+  const setInitialized = useUserStore(state => state.setInitialized);
 
   // 앱 로드 시 세션 복구 (Hydration)
   useEffect(() => {
@@ -22,6 +23,8 @@ function App() {
         login(userData); // 쿠키가 살아있다면 스토어 복구
       } catch (error) {
         logout(); // 쿠키가 없거나 만료되었다면 로그아웃 처리
+      } finally {
+        setInitialized(true); // 성공/실패 여부와 상관없이 세션 확인 완료
       }
     };
     restoreSession();
