@@ -156,13 +156,7 @@ export const useRegisterForm = () => {
       gfnToast('common.success.join');
       navigate('/join/complete');
     } catch (error) {
-      if (error.response && error.response.data && error.response.data.code === 'DUPLICATE_VALUE') {
-        const msg = error.response.data.message || getMsg('valid.common.duplicate', '입력값');
-        gfnError(msg);
-      } else {
-        gfnToast('common.fail.save', ['회원가입']);
-        console.error('회원가입 에러:', error);
-      }
+      console.error('회원가입 에러:', error);
     } finally {
       setIsSubmitting(false);
     }
