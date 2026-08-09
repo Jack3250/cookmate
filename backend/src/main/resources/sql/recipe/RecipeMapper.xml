@@ -41,6 +41,23 @@
           AND (
               R.RECIPE_TTL LIKE CONCAT('%', #{searchKeyword}, '%')
               OR R.DISH_NM LIKE CONCAT('%', #{searchKeyword}, '%')
+              OR EXISTS (
+                  SELECT 1
+                  FROM INGREDIENT I
+                  WHERE I.RECIPE_SEQ = R.RECIPE_SEQ
+                    AND I.DEL_YN = 'N'
+                    AND I.INGRD_NM LIKE CONCAT('%', #{searchKeyword}, '%')
+              )
+              OR EXISTS (
+                  SELECT 1
+                  FROM RECIPE_HASHTAG RH
+                  INNER JOIN HASHTAG H
+                     ON RH.HSTG_SEQ = H.HSTG_SEQ
+                    AND H.DEL_YN = 'N'
+                  WHERE RH.RECIPE_SEQ = R.RECIPE_SEQ
+                    AND RH.DEL_YN = 'N'
+                    AND H.HSTG_NM LIKE CONCAT('%', #{searchKeyword}, '%')
+              )
           )
         </if>
         <if test="dateRange != null and dateRange != ''">
