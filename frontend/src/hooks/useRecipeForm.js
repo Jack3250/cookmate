@@ -4,12 +4,18 @@ import { retrieveRecipeInfo, insertRecipeInfo, updateRecipeInfo } from "../api/r
 import useCodeStore from "../stores/useCodeStore";
 import { gfnToast } from "../utils/toastUtils";
 
+// 파일 최대 크기
+const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
+
 /**
  * 레시피 등록 및 수정 폼 상태 및 비즈니스 로직을 캡슐화한 커스텀 훅
  */
 export function useRecipeForm() {
   const { recipeId } = useParams();
   const navigate = useNavigate();
+
+  // 수정 체크 (수정된 내역이 있는지)
+  const isModify = useRef(false);
 
   // 공통코드 스토어 바인딩
   const fetchCodes = useCodeStore((state) => state.fetchCodes);
@@ -44,6 +50,7 @@ export function useRecipeForm() {
   // 재료 목록 상태
   const [ingredients, setIngredients] = useState([
     {
+      id: crypto.randomUUID(),
       ingrdNm: ""
       , ingrdAmt: ""
       , ingrdUnt: ""
@@ -53,6 +60,7 @@ export function useRecipeForm() {
   // 조리 단계 목록 상태
   const [steps, setSteps] = useState([
     {
+      id: crypto.randomUUID(),
       stepNo: 1
       , stepCn: ""
       , fileGrpId: null
@@ -83,6 +91,18 @@ export function useRecipeForm() {
     };
     initCodes();
   }, [fetchCodes]);
+
+  // 페이지 이탈 방지 이벤트 설정
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (isModify.current) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, []);
 
   // 수정 모드 시 기존 레시피 데이터 로드
   useEffect(() => {
@@ -125,6 +145,7 @@ export function useRecipeForm() {
       if (data.ingredients && data.ingredients.length > 0) {
         setIngredients(
           data.ingredients.map((ing) => ({
+            id: crypto.randomUUID(),
             ingrdNm: ing.ingrdNm || ""
             , ingrdAmt: ing.ingrdAmt != null ? String(ing.ingrdAmt) : ""
             , ingrdUnt: ing.ingrdUnt || ""
@@ -136,6 +157,7 @@ export function useRecipeForm() {
       if (data.steps && data.steps.length > 0) {
         setSteps(
           data.steps.map((st, idx) => ({
+            id: crypto.randomUUID(),
             stepNo: st.stepNo || idx + 1
             , stepCn: st.stepCn || ""
             , fileGrpId: st.fileGrpId || null
@@ -162,6 +184,7 @@ export function useRecipeForm() {
    * 기본 정보 입력값 변경 핸들러
    */
   const handleInputChange = (e) => {
+    isModify.current = true;
     const { name, value } = e.target;
     setRecipeForm((prev) => ({ ...prev, [name]: value }));
   };
@@ -172,6 +195,11 @@ export function useRecipeForm() {
   const handleMainImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      if (file.size > MAX_FILE_SIZE) {
+        gfnToast("valid.file.size", ["2MB"]); // 파일 용량은 {0}를 초과할 수 없습니다.
+        return;
+      }
+      isModify.current = true;
       const previewUrl = URL.createObjectURL(file);
       setMainImage((prev) => ({
         ...prev
@@ -185,6 +213,7 @@ export function useRecipeForm() {
    * 대표 이미지 삭제 핸들러
    */
   const handleRemoveMainImage = () => {
+    isModify.current = true;
     setMainImage({ file: null, previewUrl: "", fileGrpId: null });
     if (mainImageInputRef.current) {
       mainImageInputRef.current.value = "";
@@ -195,6 +224,7 @@ export function useRecipeForm() {
    * 재료 항목 값 변경 핸들러
    */
   const handleIngredientChange = (index, field, value) => {
+    isModify.current = true;
     setIngredients((prev) => {
       const next = [...prev];
       next[index] = { ...next[index], [field]: value };
@@ -206,9 +236,10 @@ export function useRecipeForm() {
    * 재료 행 추가 핸들러
    */
   const handleAddIngredient = () => {
+    isModify.current = true;
     setIngredients((prev) => [
       ...prev
-      , { ingrdNm: "", ingrdAmt: "", ingrdUnt: "" }
+      , { id: crypto.randomUUID(), ingrdNm: "", ingrdAmt: "", ingrdUnt: "" }
     ]);
   };
 
@@ -220,13 +251,28 @@ export function useRecipeForm() {
       gfnToast("valid.require.min.count", ["1", "재료"]); // 최소 {0}개 이상의 {1}이(가) 필요합니다.  
       return;
     }
+    isModify.current = true;
     setIngredients((prev) => prev.filter((_, idx) => idx !== index));
+  };
+
+  /**
+   * 재료 순서 변경 핸들러 (DnD)
+   */
+  const handleMoveIngredient = (oldIndex, newIndex) => {
+    isModify.current = true;
+    setIngredients((prev) => {
+      const next = [...prev];
+      const [movedItem] = next.splice(oldIndex, 1);
+      next.splice(newIndex, 0, movedItem);
+      return next;
+    });
   };
 
   /**
    * 조리 단계 설명 텍스트 변경 핸들러
    */
   const handleStepTextChange = (index, value) => {
+    isModify.current = true;
     setSteps((prev) => {
       const next = [...prev];
       next[index] = { ...next[index], stepCn: value };
@@ -240,6 +286,11 @@ export function useRecipeForm() {
   const handleStepImageChange = (index, e) => {
     const file = e.target.files[0];
     if (file) {
+      if (file.size > MAX_FILE_SIZE) {
+        gfnToast("valid.file.size", ["2MB"]); // 파일 용량은 {0}를 초과할 수 없습니다.
+        return;
+      }
+      isModify.current = true;
       const previewUrl = URL.createObjectURL(file);
       setSteps((prev) => {
         const next = [...prev];
@@ -257,6 +308,7 @@ export function useRecipeForm() {
    * 조리 단계 이미지 삭제 핸들러
    */
   const handleRemoveStepImage = (index) => {
+    isModify.current = true;
     setSteps((prev) => {
       const next = [...prev];
       next[index] = {
@@ -272,9 +324,10 @@ export function useRecipeForm() {
    * 조리 단계 추가 핸들러
    */
   const handleAddStep = () => {
+    isModify.current = true;
     setSteps((prev) => [
       ...prev
-      , { stepNo: prev.length + 1, stepCn: "", fileGrpId: null, previewUrl: "", file: null }
+      , { id: crypto.randomUUID(), stepNo: prev.length + 1, stepCn: "", fileGrpId: null, previewUrl: "", file: null }
     ]);
   };
 
@@ -286,8 +339,24 @@ export function useRecipeForm() {
       gfnToast("valid.require.min.count", ["1", "조리 단계"]); // 최소 {0}개 이상의 {1}이(가) 필요합니다.
       return;
     }
+    isModify.current = true;
     setSteps((prev) => {
       const next = prev.filter((_, idx) => idx !== index);
+      return next.map((st, idx) => ({ ...st, stepNo: idx + 1 }));
+    });
+  };
+
+  /**
+   * 조리 순서 변경 핸들러
+   */
+  const handleMoveStep = (oldIndex, newIndex) => {
+    isModify.current = true;
+    setSteps((prev) => {
+      const next = [...prev];
+      const [movedItem] = next.splice(oldIndex, 1);
+      next.splice(newIndex, 0, movedItem);
+
+      // stepNo 재정렬
       return next.map((st, idx) => ({ ...st, stepNo: idx + 1 }));
     });
   };
@@ -435,6 +504,7 @@ export function useRecipeForm() {
         gfnToast("common.success.regist", ["레시피"]); // {0}이(가) 성공적으로 등록되었습니다.
       }
 
+      isModify.current = false; // 저장 완료 시 수정 여부 확인 해제
       navigate(`/recipes/detail/${responseId}`);
     } catch (error) {
       console.error("레시피 저장 실패:", error);
@@ -448,6 +518,7 @@ export function useRecipeForm() {
     onIngredientChange: handleIngredientChange,
     onAddIngredient: handleAddIngredient,
     onRemoveIngredient: handleRemoveIngredient,
+    onMoveIngredient: handleMoveIngredient,
   };
 
   const stepActions = {
@@ -456,6 +527,7 @@ export function useRecipeForm() {
     onRemoveStepImage: handleRemoveStepImage,
     onAddStep: handleAddStep,
     onRemoveStep: handleRemoveStep,
+    onMoveStep: handleMoveStep,
   };
 
   const hashtagActions = {

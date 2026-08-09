@@ -2,6 +2,7 @@ import React from "react";
 import { useRecipeForm } from "../../hooks/useRecipeForm";
 import IngredientForm from "../../components/recipe/IngredientForm";
 import StepForm from "../../components/recipe/StepForm";
+import { gfnConfirm } from "../../utils/confirmUtils";
 
 /**
  * 상태 캡슐화(useRecipeForm 훅 적용)로 군더더기 없이 깔끔해진 레시피 등록/수정 메인 페이지
@@ -51,7 +52,7 @@ function RecipeFormPage() {
             placeholder="레시피 제목을 입력해 주세요"
             value={recipeForm.recipeTtl}
             onChange={handleInputChange}
-            className="w-full text-xl md:text-2xl font-bold placeholder-gray-300 dark:placeholder-gray-600 border-0 border-b-2 border-gray-200 dark:border-zinc-700 bg-transparent focus:ring-0 focus:border-primary px-0 py-3 transition-colors focus:outline-none"
+            className="w-full px-3 text-xl md:text-2xl font-bold placeholder-gray-300 dark:placeholder-gray-600 border-0 border-b-2 border-gray-200 dark:border-zinc-700 bg-transparent focus:ring-0 focus:border-primary py-3 transition-colors focus:outline-none"
             required
           />
 
@@ -64,7 +65,7 @@ function RecipeFormPage() {
                 placeholder="예) 김치찌개"
                 value={recipeForm.dishNm}
                 onChange={handleInputChange}
-                className="w-full rounded-lg border-gray-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 text-sm focus:border-primary focus:ring-primary py-2"
+                className="w-full px-3 rounded-lg border-gray-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 text-sm focus:border-primary focus:ring-primary py-2"
                 required
               />
             </div>
@@ -111,14 +112,14 @@ function RecipeFormPage() {
                   placeholder="시간 입력"
                   value={recipeForm.cookingTime}
                   onChange={handleInputChange}
-                  className="w-full rounded-lg border-gray-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 text-sm focus:border-primary focus:ring-primary py-2 pr-8 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  className="w-full px-3 rounded-lg border-gray-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 text-sm focus:border-primary focus:ring-primary py-2 pr-8 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   required
                 />
                 <span className="absolute right-3 top-2 text-sm text-gray-400">분</span>
               </div>
             </div>
             <div className="md:col-span-1">
-              <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1.5">공개 여부</label>
+              <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1.5">비공개</label>
               <div className="flex items-center h-[38px]">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
@@ -175,13 +176,22 @@ function RecipeFormPage() {
           ) : (
             <div
               onClick={() => mainImageInputRef.current && mainImageInputRef.current.click()}
+              onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add("drag-over"); }}
+              onDragLeave={(e) => { e.preventDefault(); e.currentTarget.classList.remove("drag-over"); }}
+              onDrop={(e) => {
+                e.preventDefault();
+                e.currentTarget.classList.remove("drag-over");
+                if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                  handleMainImageChange({ target: { files: e.dataTransfer.files } });
+                }
+              }}
               className="w-full h-72 rounded-xl border-2 border-dashed border-gray-300 dark:border-zinc-600 bg-gray-50 dark:bg-zinc-800/50 flex flex-col items-center justify-center cursor-pointer hover:bg-green-50 dark:hover:bg-zinc-800 hover:border-primary dark:hover:border-primary transition-all group"
             >
-              <div className="bg-white dark:bg-zinc-700 p-4 rounded-full shadow-sm mb-3 group-hover:scale-105 transition-transform">
+              <div className="bg-white dark:bg-zinc-700 p-4 rounded-full shadow-sm mb-3 group-hover:scale-105 transition-transform pointer-events-none">
                 <span className="material-icons text-4xl text-primary">add_a_photo</span>
               </div>
-              <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">대표 이미지를 클릭하여 업로드</p>
-              <p className="text-xs text-gray-400 mt-1">PNG, JPG 형식 업로드 가능</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 font-medium pointer-events-none">대표 이미지를 클릭하거나 드래그하여 업로드</p>
+              <p className="text-xs text-gray-400 mt-1 pointer-events-none">PNG, JPG 형식 업로드 가능</p>
             </div>
           )}
         </div>
@@ -207,7 +217,7 @@ function RecipeFormPage() {
             onChange={hashtagActions.onChange}
             onKeyDown={hashtagActions.onKeyDown}
             placeholder="#태그 입력 후 엔터 (예: #간단요리 #주말)"
-            className="w-full rounded-lg border-gray-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 text-sm focus:border-primary focus:ring-primary py-2.5"
+            className="w-full px-3 rounded-lg border-gray-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 text-sm focus:border-primary focus:ring-primary py-2.5"
           />
           <p className="text-xs text-gray-400 mt-1">태그는 최대 10개까지 입력 가능합니다.</p>
 
@@ -230,7 +240,11 @@ function RecipeFormPage() {
         <div className="flex items-center justify-between pt-6 border-t border-border-light dark:border-border-dark mt-8">
           <button
             type="button"
-            onClick={() => navigate(-1)}
+            onClick={async () => {
+              if (await gfnConfirm("confirm.cancel.write")) {
+                navigate(-1);
+              }
+            }}
             className="px-6 py-2.5 rounded-lg border border-gray-300 dark:border-zinc-600 text-gray-600 dark:text-gray-300 font-bold text-sm hover:bg-gray-100 dark:hover:bg-zinc-700 transition-colors cursor-pointer"
           >
             취소

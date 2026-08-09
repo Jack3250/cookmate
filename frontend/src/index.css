@@ -17,3 +17,12 @@ body {
     -webkit-transition-delay: 9999s;
   }
 }
+
+@layer utilities {
+  .drag-over {
+    @apply border-primary bg-green-50 !important;
+  }
+  .dark .drag-over {
+    @apply border-primary bg-zinc-700 !important;
+  }
+}
