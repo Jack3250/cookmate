@@ -30,6 +30,7 @@
            ON R.RGTR_KEY = U.USER_KEY
           AND U.DEL_YN = 'N'
         WHERE R.DEL_YN = 'N'
+          AND R.RECIPE_STATUS = '02'
         <if test="categoryCd != null and categoryCd != ''">
           AND R.CATEGORY_CD = #{categoryCd}
         </if>

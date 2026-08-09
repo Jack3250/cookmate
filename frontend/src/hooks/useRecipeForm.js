@@ -469,12 +469,38 @@ export function useRecipeForm() {
         , recipeCn: recipeForm.recipeCn
         , recipeStatus: finalStatusCd
         , openYn: recipeForm.openYn
+        , fileGrpId: mainImage.fileGrpId || null
         , hashtags: hashtags
-        , ingredients: validIngredients.map((ing) => ({
-          ingrdNm: ing.ingrdNm
-          , ingrdAmt: ing.ingrdAmt
-          , ingrdUnt: ing.ingrdUnt
-        }))
+        , ingredients: validIngredients.map((ing) => {
+          let parsedAmt = null;
+          if (ing.ingrdAmt) {
+            const str = String(ing.ingrdAmt).trim();
+            if (str.includes('/')) {
+              const parts = str.split(' ');
+              if (parts.length === 2) {
+                const whole = parseFloat(parts[0]);
+                const [num, den] = parts[1].split('/');
+                if (!isNaN(whole) && !isNaN(num) && !isNaN(den) && Number(den) !== 0) {
+                  parsedAmt = whole + (parseFloat(num) / parseFloat(den));
+                }
+              } else {
+                const [num, den] = str.split('/');
+                if (!isNaN(num) && !isNaN(den) && Number(den) !== 0) {
+                  parsedAmt = parseFloat(num) / parseFloat(den);
+                }
+              }
+            } else {
+              const num = parseFloat(str);
+              if (!isNaN(num)) parsedAmt = num;
+            }
+          }
+          
+          return {
+            ingrdNm: ing.ingrdNm
+            , ingrdAmt: parsedAmt
+            , ingrdUnt: ing.ingrdUnt
+          };
+        })
         , steps: validSteps.map((s, idx) => ({
           stepNo: idx + 1 // 필터링 후 번호 재부여
           , stepCn: s.stepCn

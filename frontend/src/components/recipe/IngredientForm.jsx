@@ -168,6 +168,9 @@ function IngredientForm({ ingredients, actions }) {
             ))}
           </SortableContext>
         </DndContext>
+        <span className="text-xs text-gray-400">
+          '약간'과 같은 수치가 아닌 용량은 단위에 적어주세요.
+        </span>
       </div>
 
       {/* 재료 행 추가 버튼 */}

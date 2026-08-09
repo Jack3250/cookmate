@@ -264,7 +264,7 @@ function RecipeFormPage() {
             {/* 등록/수정 완료 버튼 */}
             <button
               type="button"
-              onClick={() => handleSubmit()}
+              onClick={() => handleSubmit("02")}
               disabled={loading}
               className="px-8 py-2.5 rounded-lg bg-primary hover:bg-green-600 text-white font-bold text-sm shadow-md hover:shadow-lg transition-all flex items-center gap-1 disabled:opacity-50 cursor-pointer"
             >
