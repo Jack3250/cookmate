@@ -1,5 +1,6 @@
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
+import PrivateRoute from "./PrivateRoute";
 
 import RootLayout from "../components/layout/RootLayout";
 
@@ -35,13 +36,15 @@ function AppRouter() {
         {/* 레시피 */}
         <Route path="/recipes">
           <Route path="list" element={<RecipeListPage />} /> {/* 리스트 */}
-          <Route path="write" element={<RecipeFormPage />} /> {/* 등록 */}
-          <Route path="edit/:recipeId" element={<RecipeFormPage />} /> {/* 수정 */}
+          <Route element={<PrivateRoute />}>
+            <Route path="write" element={<RecipeFormPage />} /> {/* 등록 */}
+            <Route path="edit/:recipeId" element={<RecipeFormPage />} /> {/* 수정 */}
+          </Route>
           <Route path="detail/:recipeId" element={<RecipeDetailPage />} /> {/* 상세 */}
         </Route>
 
         {/* 마이페이지 */}
-        <Route path="/mypage">
+        <Route path="/mypage" element={<PrivateRoute />}>
           <Route index element={<MyDashboardPage />} /> {/* 대시보드 */}
           <Route path="profile" element={<MyProfileEditPage />} /> {/* 정보수정 */}
         </Route>
@@ -49,8 +52,10 @@ function AppRouter() {
         {/* 게시판 */}
         <Route path="/board">
           <Route path="list/:boardId" element={<BoardListPage />} /> {/* 리스트 */}
-          <Route path="write/:boardId" element={<BoardFormPage />} /> {/* 등록 */}
-          <Route path="edit/:boardId/:postId" element={<BoardFormPage />} /> {/* 수정 */}
+          <Route element={<PrivateRoute />}>
+            <Route path="write/:boardId" element={<BoardFormPage />} /> {/* 등록 */}
+            <Route path="edit/:boardId/:postId" element={<BoardFormPage />} /> {/* 수정 */}
+          </Route>
           <Route path="detail/:boardId/:postId" element={<BoardDetailPage />} /> {/* 상세 */}
         </Route>
       </Route>
