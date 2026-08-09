@@ -7,7 +7,7 @@ function ConfirmModal() {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm">
       <div
         className="bg-white dark:bg-zinc-900 rounded-2xl shadow-xl w-[90%] max-w-sm p-6 transform transition-all animate-[fadeIn_0.2s_ease-out]"
       >

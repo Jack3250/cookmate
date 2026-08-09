@@ -11,6 +11,15 @@ export const selectRecipeInfoList = async (params) => {
 };
 
 /**
+ * 임시저장 레시피 목록 조회
+ * @returns {Promise<Array>} 임시저장 레시피 목록
+ */
+export const selectTempRecipeList = async () => {
+  const response = await client.get('/recipe/selectTempRecipeList');
+  return response.data;
+};
+
+/**
  * 레시피 정보 상세 조회
  * @param {String} recipeId 레시피 ID
  * @returns {Promise<Object>} 레시피 상세 정보
