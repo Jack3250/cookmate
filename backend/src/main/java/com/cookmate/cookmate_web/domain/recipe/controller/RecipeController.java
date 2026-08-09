@@ -50,6 +50,16 @@ public class RecipeController {
     }
 
     /**
+     * 임시저장 레시피 목록 조회
+     * @param userKey 세션 사용자 키
+     * @return 임시저장 레시피 목록
+     */
+    @GetMapping("/selectTempRecipeList")
+    public ResponseEntity<List<RecipeResponseDTO.Summary>> selectTempRecipeList(@LoginUser String userKey) {
+        return ResponseEntity.ok(recipeService.selectTempRecipeList(userKey));
+    }
+
+    /**
      * 레시피 정보 등록
      * @param userKey 세션 사용자 키
      * @param request 등록 요청 데이터

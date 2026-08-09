@@ -70,6 +70,31 @@
         <include refid="pagination.end" />
     </select>
 
+    <select id="selectTempRecipeList" parameterType="string" resultType="com.cookmate.cookmate_web.domain.recipe.dto.RecipeResponseDTO$Summary">
+        /* RecipeMapper.selectTempRecipeList : 임시저장 레시피 목록 조회 */
+        SELECT R.RECIPE_SEQ
+             , R.RECIPE_ID
+             , R.RECIPE_TTL
+             , R.DISH_NM
+             , R.RECIPE_CN
+             , R.COOKING_TIME
+             , R.RECIPE_DIFFICULT_CD
+             , R.CATEGORY_CD
+             , R.VIEW_CNT
+             , 0 AS LIKE_CNT
+             , U.USER_NM AS WRITER_NAME
+             , R.FILE_GRP_ID
+             , COALESCE(R.MDFCN_DT, R.REG_DT) AS REG_DT
+        FROM RECIPE R
+        INNER JOIN USERS U
+           ON R.RGTR_KEY = U.USER_KEY
+          AND U.DEL_YN = 'N'
+        WHERE R.DEL_YN = 'N'
+          AND R.RECIPE_STATUS = '01'
+          AND R.RGTR_KEY = #{userKey}
+        ORDER BY REG_DT DESC
+    </select>
+
     <select id="retrieveRecipeInfo" parameterType="string" resultType="com.cookmate.cookmate_web.domain.recipe.dto.RecipeResponseDTO$Detail">
         /* RecipeMapper.retrieveRecipeInfo : 레시피 정보 상세 조회 */
         SELECT R.RECIPE_SEQ

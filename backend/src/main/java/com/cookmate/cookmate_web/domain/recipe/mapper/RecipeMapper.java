@@ -38,6 +38,13 @@ public interface RecipeMapper {
     List<RecipeResponseDTO.Summary> selectRecipeInfoList(RecipeRequestDTO.Search request);
 
     /**
+     * 임시저장 레시피 목록 조회
+     * @param userKey 유저 키
+     * @return 임시저장 레시피 목록
+     */
+    List<RecipeResponseDTO.Summary> selectTempRecipeList(String userKey);
+
+    /**
      * 레시피 정보 상세 조회
      * @param recipeId 레시피 ID
      * @return 레시피 상세 정보

@@ -9,6 +9,7 @@ import com.cookmate.cookmate_web.domain.recipe.dto.RecipeRequestDTO;
 import com.cookmate.cookmate_web.domain.recipe.dto.RecipeResponseDTO;
 import com.cookmate.cookmate_web.domain.recipe.mapper.RecipeMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -32,6 +33,7 @@ import java.util.Map;
  * </pre>
  */
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class RecipeService {
@@ -81,6 +83,35 @@ public class RecipeService {
                 .pageSize(request.getPageSize())
                 .list(recipeList)
                 .build();
+    }
+
+    /**
+     * 임시저장 레시피 목록 조회
+     * @param userKey 유저 키
+     * @return 임시저장 레시피 목록
+     */
+    @Transactional(readOnly = true)
+    public List<RecipeResponseDTO.Summary> selectTempRecipeList(String userKey) {
+        List<RecipeResponseDTO.Summary> recipeList = recipeMapper.selectTempRecipeList(userKey);
+        
+        if (recipeList != null && !recipeList.isEmpty()) {
+            for (RecipeResponseDTO.Summary recipe : recipeList) {
+                // 메인 이미지 url 조회
+                try {
+                    List<String> urls = fileService.getFileUrls(recipe.getFileGrpId());
+                    if (!urls.isEmpty()) {
+                        recipe.setMainImageUrl(urls.get(0));
+                    }
+                } catch (Exception e) {
+                    log.warn("임시 저장 레시피 파일 정보 없음. ({})", e.getMessage());
+                    // 임시저장의 경우 파일 정보가 삭제되거나 불완전할 수 있으므로 에러를 무시합니다.
+                }
+            }
+        } else {
+            recipeList = java.util.List.of();
+        }
+        
+        return recipeList;
     }
 
     /**
