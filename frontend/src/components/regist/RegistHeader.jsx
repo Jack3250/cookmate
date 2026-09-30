@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import logo from '../../assets/common/Logo.png';
 
 function RegistHeader({ currentStep = 1 }) {
   const navigate = useNavigate();
@@ -24,7 +25,7 @@ function RegistHeader({ currentStep = 1 }) {
         <div className="flex items-center cursor-pointer" onClick={() => navigate('/')}>
           <img
             alt="CookMate Logo"
-            src="/src/assets/common/Logo.png"
+            src={logo}
             className="h-7 w-auto object-contain"
           />
         </div>

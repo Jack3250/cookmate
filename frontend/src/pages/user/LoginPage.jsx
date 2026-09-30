@@ -4,6 +4,7 @@ import { loginApi } from "../../api/userApi";
 import { gfnToast } from "../../utils/toastUtils";
 import FormInput from "../../components/regist/FormInput";
 import useUserStore from "../../stores/useUserStore";
+import logo from "../../assets/common/Logo.png";
 
 function LoginPage() {
   const [loginId, setLoginId] = useState("");
@@ -43,7 +44,7 @@ function LoginPage() {
         <div className="text-center mb-10">
           <Link to="/main" className="inline-flex items-center justify-center group decoration-transparent">
             <img
-              src="/src/assets/common/Logo.png"
+              src={logo}
               alt="CookMate Logo"
               className="h-14 w-auto object-contain"
             />

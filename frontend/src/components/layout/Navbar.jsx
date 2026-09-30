@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import useUserStore from '../../stores/useUserStore';
 import { logoutApi } from '../../api/userApi';
 import { gfnToast } from '../../utils/toastUtils';
+import logo from '../../assets/common/Logo.png';
 
 function Navbar() {
   const navigate = useNavigate();
@@ -31,7 +32,7 @@ function Navbar() {
       <div className="flex items-center cursor-pointer" onClick={() => navigate('/main')}>
         <img
           alt="CookMate Logo" 
-          src="/src/assets/common/Logo.png"
+          src={logo}
           className="h-7 w-auto object-contain" 
         />
       </div>

@@ -3,6 +3,7 @@ import { useLocation, Link } from "react-router-dom";
 import FormInput from "../../components/regist/FormInput";
 import { findIdApi, findPwApi } from "../../api/userApi";
 import { gfnToast } from "../../utils/toastUtils";
+import logo from "../../assets/common/Logo.png";
 
 function FindAccountPage() {
   const location = useLocation();
@@ -71,7 +72,7 @@ function FindAccountPage() {
         <div className="text-center mb-8">
           <Link to="/main" className="inline-flex items-center justify-center group decoration-transparent">
             <img 
-              src="/src/assets/common/Logo.png" 
+              src={logo}
               alt="CookMate Logo" 
               className="h-12 w-auto object-contain"
             />
