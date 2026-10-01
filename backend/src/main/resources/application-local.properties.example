@@ -1,0 +1,7 @@
+spring.datasource.url=jdbc:postgresql://YOUR_DB_IP:5432/cookmate?currentSchema=cookmate
+spring.datasource.username=cookmate
+spring.datasource.password=YOUR_DB_PASSWORD
+
+file.upload-dir=//YOUR_DB_IP/FileServer/cookmate/uploads/
+
+logging.level.com.cookmate.cookmate_web=DEBUG

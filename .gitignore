@@ -63,4 +63,4 @@ bin/
 document
 
 ### 보안 파일 제외 ###
-src/main/resources/application.properties
+backend/src/main/resources/application-local.properties
