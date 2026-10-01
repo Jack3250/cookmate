@@ -1,8 +1,8 @@
 package com.cookmate.cookmate_web.domain.global.error;
 
+import com.cookmate.cookmate_web.domain.global.config.DatabaseMessageSource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class GlobalExceptionHandler {
 
-    private final MessageSource messageSource;
+    private final DatabaseMessageSource databaseMessageSource;
 
     /**
      * Valid 어노테이션 유효성 검증 실패 시 호출됨
@@ -66,7 +66,7 @@ public class GlobalExceptionHandler {
         ErrorCode errorCode = e.getErrorCode();
 
         // DB에서 메시지 조회 (전달받은 args를 함께 넘김)
-        String message = messageSource.getMessage(
+        String message = databaseMessageSource.getMessage(
                 errorCode.getMessageKey(),
                 e.getArgs(),
                 "정의되지 않은 메시지입니다.",

@@ -2,7 +2,10 @@ package com.cookmate.cookmate_web.domain.global.config;
 
 import com.cookmate.cookmate_web.domain.global.resolver.LoginUserArgumentResolver;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.validation.Validator;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -28,6 +31,23 @@ import java.util.List;
 public class WebMvcConfig implements WebMvcConfigurer {
 
     private final LoginUserArgumentResolver loginUserArgumentResolver;
+    private final DatabaseMessageSource databaseMessageSource;
+
+    /**
+     * Bean Validation 메시지만 CookMate의 DB 기반 메시지 소스를 사용한다.
+     * Spring Framework 전역 MessageSource와는 분리한다.
+     */
+    @Bean
+    public LocalValidatorFactoryBean databaseMessageValidator() {
+        LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
+        validator.setValidationMessageSource(databaseMessageSource);
+        return validator;
+    }
+
+    @Override
+    public Validator getValidator() {
+        return databaseMessageValidator();
+    }
 
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {

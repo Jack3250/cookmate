@@ -22,7 +22,7 @@ import java.util.Locale;
  * 2026-01-17      강보람          최초 생성
  * </pre>
  */
-@Component("messageSource")
+@Component("databaseMessageSource")
 @RequiredArgsConstructor
 public class DatabaseMessageSource extends AbstractMessageSource {
 
