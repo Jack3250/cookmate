@@ -32,34 +32,34 @@ public class UserDTO {
 
         private String userKey;
 
-        @NotBlank(message = "{valid.user.id.required}")
-        @Pattern(regexp = "^[a-z0-9]{4,20}$", message = "{valid.user.id.pattern}")
+        @NotBlank(message = "valid.require.input")
+        @Pattern(regexp = "^[a-z0-9]{4,20}$", message = "valid.format.id")
         private String loginId;
 
-        @NotBlank(message = "{valid.user.pswd.required}")
-        @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?~`])[A-Za-z\\d!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?~`]{8,16}$", message = "{valid.user.pswd.pattern}")
+        @NotBlank(message = "valid.require.input")
+        @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?~`])[A-Za-z\\d!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?~`]{8,16}$", message = "valid.format.password")
         private String pswd;
 
         private String encPswd;
 
-        @NotBlank(message = "{valid.user.nm.required}")
+        @NotBlank(message = "valid.require.input")
         private String userNm;
 
-        @NotBlank(message = "{valid.user.nickname.required}")
-        @Pattern(regexp = "^[가-힣a-zA-Z0-9]{2,10}$", message = "{valid.user.nickname.pattern}")
+        @NotBlank(message = "valid.require.input")
+        @Pattern(regexp = "^[가-힣a-zA-Z0-9]{2,10}$", message = "valid.format.nickname")
         private String nickname;
 
-        @NotBlank(message = "{valid.user.email.required}")
-        @Email(message = "{valid.user.email.format}")
+        @NotBlank(message = "valid.require.input")
+        @Email(message = "valid.format.invalid")
         private String email;
 
-        @NotBlank(message = "{valid.user.phone.required}")
+        @NotBlank(message = "valid.require.input")
         private String telPhone;
 
-        @NotBlank(message = "{valid.user.gender.required}")
+        @NotBlank(message = "valid.require.select")
         private String gender;
 
-        @NotNull(message = "{valid.user.brth.required}")
+        @NotNull(message = "valid.require.input")
         private String userBrth;
 
         private String zipCd;
@@ -73,10 +73,10 @@ public class UserDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class LoginRequest { // 로그인 요청 데이터
-        @NotBlank(message = "{valid.user.id.required}")
+        @NotBlank(message = "valid.require.input")
         private String loginId;
 
-        @NotBlank(message = "{valid.user.pswd.required}")
+        @NotBlank(message = "valid.require.input")
         private String pswd;
         
         private boolean keepLoggedIn; // 로그인 상태 유지 여부
@@ -87,11 +87,11 @@ public class UserDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class FindIdRequest { // 아이디 찾기 요청 데이터
-        @NotBlank(message = "{valid.user.nm.required}")
+        @NotBlank(message = "valid.require.input")
         private String userNm;
 
-        @NotBlank(message = "{valid.user.email.required}")
-        @Email(message = "{valid.user.email.format}")
+        @NotBlank(message = "valid.require.input")
+        @Email(message = "valid.format.invalid")
         private String email;
     }
 
@@ -100,11 +100,11 @@ public class UserDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class FindPwRequest { // 비밀번호 찾기 요청 데이터
-        @NotBlank(message = "{valid.user.id.required}")
+        @NotBlank(message = "valid.require.input")
         private String loginId;
 
-        @NotBlank(message = "{valid.user.email.required}")
-        @Email(message = "{valid.user.email.format}")
+        @NotBlank(message = "valid.require.input")
+        @Email(message = "valid.format.invalid")
         private String email;
         
         private String encPswd; // 임시 비밀번호 암호화 저장용

@@ -48,8 +48,7 @@ public class GlobalExceptionHandler {
         List<ErrorResponse.FieldError> fieldErrors = bindingResult.getFieldErrors().stream()
                 .map(error -> new ErrorResponse.FieldError(
                         error.getField(),
-                        error.getRejectedValue() == null ? "" : error.getRejectedValue().toString(),
-                        error.getDefaultMessage() // 여기서 DB에 정의한 메시지가 주입됩니다.
+                        error.getDefaultMessage() // Bean Validation에 선언된 메시지 코드를 그대로 전달
                 ))
                 .collect(Collectors.collectingAndThen(Collectors.toList(), List::copyOf));
 

@@ -1,5 +1,6 @@
 import toast from 'react-hot-toast';
 import { useMessageStore } from '../stores/useMessageStore';
+import { getValidationErrorText } from './validationUtils';
 
 /**
  * 전역 토스트 출력 함수
@@ -51,4 +52,13 @@ export const gfnError = (message) => {
   if (message) {
     toast.error(message);
   }
+};
+
+/**
+ * 백엔드 validation 오류를 공통 메시지로 변환해 출력한다.
+ * @param {{ field: string, code: string }} fieldError
+ */
+export const gfnValidationError = (fieldError) => {
+  const getMsgText = useMessageStore.getState().getMsgText;
+  toast.error(getValidationErrorText(fieldError, getMsgText));
 };

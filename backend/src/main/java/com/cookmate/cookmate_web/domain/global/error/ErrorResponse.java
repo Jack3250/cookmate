@@ -41,13 +41,11 @@ public class ErrorResponse {
     @Getter
     public static class FieldError {
         private final String field;
-        private final String value;
-        private final String reason;
+        private final String code;
 
-        public FieldError(String field, String value, String reason) {
+        public FieldError(String field, String code) {
             this.field = field;
-            this.value = value;
-            this.reason = reason;
+            this.code = code;
         }
     }
 }

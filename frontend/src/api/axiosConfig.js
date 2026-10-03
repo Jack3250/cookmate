@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { gfnError } from '../utils/toastUtils';
+import { gfnError, gfnValidationError } from '../utils/toastUtils';
 
 const client = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL // 백엔드 기본 주소
@@ -22,8 +22,14 @@ client.interceptors.response.use(
       
       // 401, 403 등은 인증/인가 처리 로직(컴포넌트 단)과 겹칠 수 있으므로 제외하거나 상황에 맞게 처리
       if (status !== 401 && status !== 403 && status !== 404) {
+        const firstValidationError = status === 400 && Array.isArray(data?.errors)
+          ? data.errors[0]
+          : null;
+
+        if (firstValidationError?.field && firstValidationError?.code) {
+          gfnValidationError(firstValidationError);
         // 백엔드에서 반환한 ErrorResponse 객체의 message가 있으면 출력
-        if (data && data.message) {
+        } else if (data && data.message) {
           gfnError(data.message);
         } else if (status >= 500) {
           gfnError("서버 내부 오류가 발생했습니다.");
