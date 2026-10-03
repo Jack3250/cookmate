@@ -56,7 +56,9 @@ export const gfnError = (message) => {
 
 /**
  * 백엔드 validation 오류를 공통 메시지로 변환해 출력한다.
- * @param {{ field: string, code: string }} fieldError
+ *
+ * @param {{field: string, code: string}} fieldError 백엔드에서 반환한 validation 오류
+ * @returns {void}
  */
 export const gfnValidationError = (fieldError) => {
   const getMsgText = useMessageStore.getState().getMsgText;

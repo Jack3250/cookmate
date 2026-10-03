@@ -42,8 +42,6 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     protected ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
-        log.error("handleMethodArgumentNotValidException : ", e);
-
         BindingResult bindingResult = e.getBindingResult();
         List<ErrorResponse.FieldError> fieldErrors = bindingResult.getFieldErrors().stream()
                 .map(error -> new ErrorResponse.FieldError(
@@ -51,6 +49,10 @@ public class GlobalExceptionHandler {
                         error.getDefaultMessage() // Bean Validation에 선언된 메시지 코드를 그대로 전달
                 ))
                 .collect(Collectors.collectingAndThen(Collectors.toList(), List::copyOf));
+
+        log.debug("validation failed: {}", fieldErrors.stream()
+                .map(error -> "field=" + error.getField() + ", code=" + error.getCode())
+                .collect(Collectors.joining("; ")));
 
         ErrorResponse response = ErrorResponse.of("입력값이 올바르지 않습니다.", HttpStatus.BAD_REQUEST.value(), fieldErrors);
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);

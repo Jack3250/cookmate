@@ -33,10 +33,40 @@ export const FIELD_LABELS = {
 };
 
 const DEFAULT_VALIDATION_MESSAGE = '입력값이 올바르지 않습니다.';
+const VALIDATION_ERROR_PRIORITY = [
+  'valid.require.input',
+  'valid.require.select',
+];
+
+/**
+ * validation 오류 중 사용자에게 먼저 보여줄 항목을 선택한다.
+ * 필수 입력/선택 오류가 없으면 서버가 반환한 첫 번째 오류를 유지한다.
+ *
+ * @param {Array<{field: string, code: string}>} errors 백엔드에서 반환한 validation 오류 목록
+ * @returns {{field: string, code: string} | null} 우선순위에 따라 선택된 오류, 유효한 목록이 없으면 null
+ */
+export const selectValidationError = (errors) => {
+  if (!Array.isArray(errors) || errors.length === 0) {
+    return null;
+  }
+
+  for (const code of VALIDATION_ERROR_PRIORITY) {
+    const priorityError = errors.find((error) => error?.code === code);
+    if (priorityError) {
+      return priorityError;
+    }
+  }
+
+  return errors[0];
+};
 
 /**
  * 백엔드의 field + code validation 오류를 CMMN_MSG 문구로 변환한다.
  * 메시지 로딩 전이거나 코드가 없으면 사용자에게 코드 대신 기본 문구를 반환한다.
+ *
+ * @param {{field: string, code: string} | null | undefined} fieldError 백엔드 validation 오류
+ * @param {(messageCode: string, ...params: string[]) => string} getMsgText CMMN_MSG 코드와 치환값으로 메시지를 조회하는 함수
+ * @returns {string} 필드명이 치환된 사용자 메시지 또는 fallback 메시지
  */
 export const getValidationErrorText = (fieldError, getMsgText) => {
   if (!fieldError?.code || typeof getMsgText !== 'function') {
